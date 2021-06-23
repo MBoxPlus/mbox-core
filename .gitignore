@@ -1,0 +1,7 @@
+Pods
+node_modules
+build
+
+xcshareddata
+xcuserdata
+.vscode
