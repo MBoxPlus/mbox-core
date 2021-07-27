@@ -6,8 +6,6 @@
 //  Copyright © 2020 bytedance. All rights reserved.
 //
 
-import AppKit
-
 public protocol MBUserProtocol {
     var nickname: String? { get }
     var email: String? { get }

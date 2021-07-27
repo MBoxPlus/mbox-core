@@ -56,6 +56,7 @@ open class MBCommander: NSObject {
         return [
             Option("api", description: "Output information with API format.", values: MBLoggerAPIFormatter.allCases.map { $0.rawValue }),
             Option("root", description: "Set Root Directory"),
+            Option("home", description: "Set Configuration Home Directory"),
         ]
     }
 
@@ -168,7 +169,7 @@ open class MBCommander: NSObject {
 
     open func shiftArguments(_ name: String) -> [String] {
         guard let argument = self.allArguments[name] as? Argument else {
-            assertionFailure("在 arguments 类方法中未声明有该参数")
+            assertionFailure("在 arguments 类方法中未声明有该参数: \(name)")
             return []
         }
         do {
@@ -295,7 +296,7 @@ open class MBCommander: NSObject {
     }
 
     open lazy var requireSetupLauncher = true
-    open lazy var launcherPlugins = UI.activedPlugins
+    open lazy var launcherPlugins = Array(MBPluginManager.shared.packages)
 
     dynamic
     open func setupLauncher(force: Bool = false) throws {
@@ -331,18 +332,6 @@ open class MBCommander: NSObject {
     open func invoke(_ cmd: MBCommander.Type, argv: ArgumentParser? = nil) throws {
         let other = try cmd.init(argv: argv ?? self.argv, command: self)
         try other.performAction()
-    }
-
-    @discardableResult
-    open func open(path: String, withApplication appName: String? = nil) -> Bool {
-        let info: String
-        if let app = appName, !app.isEmpty {
-            info = "\(app) open `\(path)`"
-        } else {
-            info = "Open `\(path)`"
-        }
-        UI.log(info: info)
-        return ExternalApp(name: appName).open(file: path)
     }
 
     @discardableResult

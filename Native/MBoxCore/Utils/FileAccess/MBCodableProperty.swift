@@ -10,18 +10,22 @@ import Foundation
 
 public protocol CodableProperty {
     var name: String? { get set }
-    var key: String? { get set }
+    var keys: [String] { get set }
+    var key: String? { get }
     var instance: AnyObject? { get set }
 }
 
 @propertyWrapper
 public class Codable<T: CodableType>: CodableProperty {
-    public var key: String? = nil
+    public var keys: [String] = []
+    public var key: String? {
+        return self.keys.first ?? self.name
+    }
+    public var mainKey: String?
     public var name: String? = nil
     let defaultValue: () -> T
     var setterTransform: ((T, AnyObject)->(T))? = nil
     var getterTransform: ((Any?, AnyObject)->(T))? = nil
-    var cacheTransform: Bool = false
     var transform: Bool = false
     public weak var instance: AnyObject?
 
@@ -30,7 +34,7 @@ public class Codable<T: CodableType>: CodableProperty {
     }
 
     public init(key: String) {
-        self.key = key
+        self.keys = [key]
         self.defaultValue = { return T.defaultValue() }
     }
 
@@ -39,7 +43,9 @@ public class Codable<T: CodableType>: CodableProperty {
     }
 
     public init(wrappedValue value: @autoclosure @escaping () -> T, key: String? = nil) {
-        self.key = key
+        if let key = key {
+            self.keys = [key]
+        }
         self.defaultValue = value
     }
 
@@ -48,9 +54,15 @@ public class Codable<T: CodableType>: CodableProperty {
         self.getterTransform = getterTransform
     }
 
-    public init(key: String, cacheTransform: Bool = false, getterTransform: @escaping (Any?, AnyObject) -> (T)) {
-        self.key = key
-        self.cacheTransform = cacheTransform
+    public init(key: String, getterTransform: @escaping (Any?, AnyObject) -> (T)) {
+        self.keys = [key]
+        self.defaultValue = { return T.defaultValue() }
+        self.getterTransform = getterTransform
+    }
+
+    public init(keys: [String], mainKey: String?, getterTransform: @escaping (Any?, AnyObject) -> (T)) {
+        self.keys = keys
+        self.mainKey = mainKey
         self.defaultValue = { return T.defaultValue() }
         self.getterTransform = getterTransform
     }
@@ -61,55 +73,79 @@ public class Codable<T: CodableType>: CodableProperty {
     }
 
     public init(key: String, setterTransform: @escaping (T, AnyObject) -> (T)) {
-        self.key = key
+        self.keys = [key]
         self.defaultValue = { return T.defaultValue() }
         self.setterTransform = setterTransform
     }
 
-    public var wrappedValue: T {
-        get {
-            guard let key = self.key,
-                let instance = self.instance as? MBCodableObject else {
-                    return defaultValue()
-            }
-            var value = instance.dictionary[key]
-            if value is NSNull {
-                value = nil
-            }
-            if value == nil,
-               let name = self.name,
-               let v = instance.dictionary[name],
-               !(v is NSNull) {
-                value = v
-            }
-            if !cacheTransform || !transform {
-                if let getterTransform = self.getterTransform {
-                    value = getterTransform(value, instance)
-                    transform = true
-                } else {
-                    if let v = value,
-                        !(value is T),
-                        let t = T.self as? MBCodable.Type {
-                        value = (try? t.load(fromObject: v)) as Any
-                        transform = true
+    private var names: [String] {
+        var names = [String]()
+        names.append(contentsOf: self.keys)
+        if let name = self.name {
+            names << name
+        }
+        return names
+    }
+
+    private func fetchValue() -> (key: String, value: Any?) {
+        if let instance = self.instance as? MBCodableObject {
+            for key in self.names {
+                var value = instance.dictionary[key]
+                if value is NSNull {
+                    value = nil
+                }
+                if let v = value {
+                    if case Optional<Any>.none = v {
+                        continue
+                    } else {
+                        return (key: key, value: v)
                     }
                 }
+            }
+        }
+        return (key: self.names.first!, value: nil)
+    }
 
-                if value == nil && !(T.self is Optional<Any>.Type) {
-                    value = defaultValue()
-                }
-
-                let obj = value as Any
-                if case Optional<Any>.none = obj {
-                    instance.dictionary.removeValue(forKey: key)
-                } else {
-                    instance.dictionary[key] = value
-                }
+    public var wrappedValue: T {
+        get {
+            guard let instance = self.instance as? MBCodableObject else {
+                return defaultValue()
             }
 
-            // 转换为 Any，防止强制转换警告
-            let result = value as Any
-            return (result as! T)
+            let (key, originValue) = self.fetchValue()
+            if transform {
+                return originValue as! T
+            }
+            var value: T
+            if let getterTransform = self.getterTransform {
+                value = getterTransform(originValue, instance)
+            } else if let v = originValue as? T {
+                value = v
+            } else if let t = T.self as? MBCodable.Type,
+                      let originValue = originValue,
+                      let v = try? t.load(fromObject: originValue) as? T {
+                value = v
+            } else {
+                value = defaultValue()
+            }
+
+            let obj = value as Any
+            if case Optional<Any>.none = obj {
+                value = defaultValue()
+            }
+
+            let obj2 = value as Any
+            if case Optional<Any>.none = obj2 {
+                instance.dictionary.removeValue(forKey: key)
+            } else {
+                for key in self.names {
+                    instance.dictionary.removeValue(forKey: key)
+                }
+                let key = self.mainKey ?? self.names.first ?? key
+                instance.dictionary[key] = value
+            }
+            transform = true
+            return value
         }
         set {
             var value: T
@@ -118,7 +154,7 @@ public class Codable<T: CodableType>: CodableProperty {
             } else {
                 value = newValue
             }
-            if let key = self.key, let instance = self.instance as? MBCodableObject {
+            if let key = self.keys.first, let instance = self.instance as? MBCodableObject {
                 if let transform = self.setterTransform {
                     value = transform(value, instance)
                 }
@@ -129,6 +165,7 @@ public class Codable<T: CodableType>: CodableProperty {
                 } else {
                     instance.dictionary[key] = value
                 }
+                transform = true
             }
         }
     }

@@ -56,15 +56,19 @@ extension MBFileProtocol {
 
     @discardableResult
     public func save(filePath: String? = nil, sortedKeys: Bool = true, prettyPrinted: Bool = true) -> Bool {
-        guard let path = filePath ?? self.filePath else { return false }
+        guard let path = filePath ?? self.filePath else {
+            UI.log(error: "Save file failed: The file path is null.")
+            return false
+        }
         guard let coder = coder(for: path.pathExtension) ?? Self.defaultCoder else { return false }
         do {
             let string = try toString(coder: coder, sortedKeys: sortedKeys, prettyPrinted: prettyPrinted)
             try? FileManager.default.createDirectory(atPath: path.deletingLastPathComponent, withIntermediateDirectories: true, attributes: nil)
+            UI.log(verbose: "Save file `\(path)`...")
             try string.write(to: URL(fileURLWithPath: path), atomically: true, encoding: .utf8)
             return true
         } catch {
-            UI.log(error: "Save file failed: \(path)")
+            UI.log(error: "Save file failed: \(path)\n\t\(error)")
             return false
         }
     }

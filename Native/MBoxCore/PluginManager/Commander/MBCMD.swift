@@ -64,6 +64,7 @@ open class MBCMD: NSObject {
         env["MBox"] = MBoxCore.bundle.shortVersion
         env["MBOX_ARGS"] = UI.args.rawDescription
         env["NSUnbufferedIO"] = "YES"
+        env["MBOX_CLI_PATH"] = ProcessInfo.processInfo.arguments.first!
         return env
     }
     public lazy var env: [String: String] = setupEnvironment()
@@ -190,7 +191,7 @@ open class MBCMD: NSObject {
     public static var status: Bool = false
 
     public static func installZSHAutocompletion() throws {
-        for name in ["mbox", "mdev", "mbox2"] {
+        for name in ["mbox", "mdev"] {
             guard let shellPath = MBoxCore.bundle.path(forResource: "Autocompletion/\(name)", ofType: "sh") else { return }
             let zshPluginPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".oh-my-zsh").path
             guard zshPluginPath.isDirectory else {
@@ -198,12 +199,15 @@ open class MBCMD: NSObject {
             }
             var targetPath = zshPluginPath.appending(pathComponent: "custom/plugins/\(name)")
             if !FileManager.default.fileExists(atPath: targetPath) {
+                UI.log(verbose: "Create directory `\(targetPath)`")
                 try FileManager.default.createDirectory(atPath: targetPath, withIntermediateDirectories: true, attributes: nil)
             }
             targetPath = targetPath.appending(pathComponent: "_\(name)")
             if targetPath.isExists {
+                UI.log(verbose: "Remove `\(targetPath)`")
                 try FileManager.default.removeItem(atPath: targetPath)
             }
+            UI.log(verbose: "Link `\(targetPath)` -> `\(shellPath)`")
             try FileManager.default.createSymbolicLink(atPath: targetPath, withDestinationPath: shellPath)
         }
         // 移除 zcompdump 缓存
@@ -226,32 +230,34 @@ open class MBCMD: NSObject {
             try cmd.sudoExec("chown -R '\(NSUserName())' '\(binDir)'",
                              prompt: "`\(binDir)` is not writable，MBox will change the ownership to your user!\nAdmin Password:")
         }
-        try installCommandLine("mbox", binDir: binDir)
-        try installCommandLine("mbox2", binDir: binDir, scriptName: "mbox")
-        try installCommandLine("mdev", binDir: binDir)
+        try installCommandLine("mbox", binDir: binDir, scriptName: "MBoxCLI")
+        try installCommandLine("mdev", binDir: binDir, scriptName: "MDevCLI")
     }
 
-    public static func installCommandLine(_ binName: String, binDir: String, scriptName: String? = nil) throws {
+    private static func installCommandLine(_ binName: String, binDir: String, scriptName: String) throws {
         let cmdPath = binDir.appending(pathComponent: binName)
-        let exeDir = MBoxCore.bundle.bundleURL.deletingLastPathComponent().path
-        let shellPath = MBoxCore.bundle.bundleURL.deletingLastPathComponent().appendingPathComponent("\(scriptName ?? binName).sh").path
-        if FileManager.default.fileExists(atPath: cmdPath) {
+        let exePath = MBoxCore.bundle.bundlePath.deletingLastPathComponent.appending(pathComponent: scriptName)
+        if let destPath = cmdPath.destinationOfSymlink {
+            if destPath == exePath {
+                return
+            }
+        }
+        if cmdPath.isExists {
+            UI.log(verbose: "Remove `\(cmdPath)`")
             try FileManager.default.removeItem(atPath: cmdPath)
         }
-        var content = try String(contentsOfFile: shellPath)
-        content = content.replacingOccurrences(of: "export MBOX_CLI_DIR=\n", with: "export MBOX_CLI_DIR=\"\(exeDir)\"\n")
-        try content.write(toFile: cmdPath, atomically: true, encoding: .utf8)
-        try FileManager.default.setAttributes([FileAttributeKey.posixPermissions: 0o700], ofItemAtPath: cmdPath)
+        UI.log(verbose: "Link `\(cmdPath)` -> `\(exePath)`")
+        try FileManager.default.createSymbolicLink(atPath: cmdPath, withDestinationPath: exePath)
     }
 
     public static func installCommandLineAlias() throws {
-        let supportFile = MBoxCore.bundle.bundleURL.deletingLastPathComponent().appendingPathComponent("mbox.sh").path
-        let profilePath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".profile")
+        let supportFile = MBoxCore.bundle.bundleURL.deletingLastPathComponent().appendingPathComponent("sourced.sh").path
+        let rcPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".mboxrc")
         var resolved = false
         let string = "[[ -s \"\(supportFile)\" ]] && source \"\(supportFile)\" # MBox"
         var content = ""
-        if profilePath.path.isFile {
-            content = try String(contentsOf: profilePath)
+        if rcPath.path.isFile {
+            content = try String(contentsOf: rcPath)
             let regex = try NSRegularExpression(pattern: "^.*? source .*?/mbox\\.sh\".*$", options: .anchorsMatchLines)
             if let index = regex.firstMatch(in: content, range: NSRange(location: 0, length: content.count)) {
                 let range = Range(index.range, in: content)
@@ -269,6 +275,7 @@ open class MBCMD: NSObject {
             content.append(string)
             content.append("\n")
         }
-        try content.write(to: profilePath, atomically: true, encoding: .utf8)
+        UI.log(verbose: "Update `\(rcPath)`")
+        try content.write(to: rcPath, atomically: true, encoding: .utf8)
     }
 }

@@ -99,7 +99,7 @@ public extension String {
         }
     }
 
-    var destinationOfSymlink: String {
+    var destinationOfSymlink: String? {
         var targetPath = self
         do {
             let symlink = try FileManager.default.destinationOfSymbolicLink(atPath: targetPath)
@@ -109,7 +109,7 @@ public extension String {
                 targetPath = targetPath.deletingLastPathComponent.appending(pathComponent:symlink)
             }
         } catch {
-            return self
+            return nil
         }
         return targetPath.standardizingPath
     }
@@ -119,14 +119,13 @@ public extension String {
             return []
         }
         return urls.compactMap { url -> String? in
-            if let isRegularFile = try? url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile, isRegularFile {
+            if (try? url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true {
                 return url.path
             }
-            if let isSymbolic = try? url.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink, isSymbolic {
-                let path = url.path.destinationOfSymlink
-                if path.isFile {
-                    return url.path
-                }
+            if (try? url.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) == true,
+               let path = url.path.destinationOfSymlink,
+               path.isFile {
+                return url.path
             }
             return nil
         }
@@ -137,14 +136,13 @@ public extension String {
             return []
         }
         return urls.compactMap { url -> String? in
-            if let isDirectory = try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory, isDirectory {
+            if (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true {
                 return url.path
             }
-            if let isSymbolic = try? url.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink, isSymbolic {
-                let path = url.path.destinationOfSymlink
-                if path.isDirectory {
-                    return url.path
-                }
+            if (try? url.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) == true,
+               let path = url.path.destinationOfSymlink,
+               path.isDirectory {
+                return url.path
             }
             return nil
         }

@@ -1,0 +1,12 @@
+{
+  "id": "core",
+  "title": "Core",
+  "type": "object",
+  "properties": {
+    "dev-root": {
+      "type": "string",
+      "title": "MBox Development Root",
+      "scopes": ["global"]
+    }
+  }
+}

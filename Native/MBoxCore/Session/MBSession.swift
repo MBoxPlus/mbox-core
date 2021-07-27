@@ -66,22 +66,6 @@ open class MBSession: NSObject {
         MBPluginManager.shared.loadAll()
     }
 
-    public var activedPlugins: [MBPluginPackage] {
-        return MBPluginManager.shared.dependencies(for: cachedPlugins.map { $0.key })
-    }
-
-    public func activedPlugin(for name: String) -> MBPluginPackage? {
-        return activedPlugins.first { $0.isPlugin(name) }
-    }
-
-    public func isEnable(forPlugin name: String) -> Bool {
-        return activedPlugins.contains { $0.isPlugin(name) }
-    }
-
-    public func isEnable(forPlugin klass: AnyClass) -> Bool {
-        let name = getModuleName(forClass: klass)
-        return isEnable(forPlugin: name)
-    }
 
     // MARK: - Status
     public var statusCode: Int32 = 0

@@ -6,7 +6,7 @@ public class UserError: Error, CustomStringConvertible, LocalizedError {
                 line: UInt = #line) {
         self.description = desc ?? ""
         if !self.description.isEmpty {
-            UI.log(verbose: "[RuntimeError]".ANSI(.red) + " \(self.description)", file: file, function: function, line: line)
+            UI.log(verbose: "[UserError]".ANSI(.red) + " \(self.description)", file: file, function: function, line: line)
         }
     }
     public var errorDescription: String? {

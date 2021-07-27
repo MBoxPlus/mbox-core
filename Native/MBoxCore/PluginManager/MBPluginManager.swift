@@ -71,7 +71,7 @@ public final class MBPluginManager: NSObject {
         logLoad("Search Plugins:")
 
         var appPluginPaths = [String]()
-        if let appPluginPath = MBoxGUI.path?.appending(pathComponent: "Contents/Resources/Plugins") {
+        if let appPluginPath = MBoxApp.path?.appending(pathComponent: "Contents/Resources/Plugins") {
             appPluginPaths.append(appPluginPath)
         }
         let appPluginPath = Self.bundle.bundlePath.appending(pathComponent: "../..").cleanPath
@@ -103,7 +103,10 @@ public final class MBPluginManager: NSObject {
         if let devRoot = UI.devRoot {
             logLoad("  \(devRoot)")
             var devPlugins = MBPluginPackage.search(directory: devRoot)
-            devPlugins.removeValue(forKey: "MBoxCore")
+            if let coreDev = devPlugins.removeValue(forKey: "MBoxCore") {
+                coreDev.nativeBundleDir = self.bundle.bundlePath.deletingLastPathComponent
+                plugins[coreDev.name] = coreDev
+            }
             for (_, v) in devPlugins {
                 v.isUnderDevelopment = true
                 if v.CLI == true,
@@ -182,21 +185,25 @@ public final class MBPluginManager: NSObject {
         logLoad("Load Plugins...")
 
         // 2. Load Package Loader
+        logLoad("Load Loader:")
         for bundle in packages.compactMap({ $0.pluginBundle(for: "Loader") }) {
             load(pluginBundle: bundle,
                  loadedBundles: &loadedBundles,
                  failedBundles: &failedBundles)
         }
-        // 3. Load Required Packages Again
-        let requiredBundles = UI.requiredPlugins(Array(packages)).compactMap { $0.defaultBundle }
+        // 3. Load Required Packages ( without forward dependencies )
+        logLoad("Load required plugin:")
+        let requiredBundles = UI.requiredPlugins(Array(packages)).filter{ $0.forwardDependencies == nil }.compactMap { $0.defaultBundle }
         for bundle in requiredBundles {
             load(pluginBundle: bundle,
                  loadedBundles: &loadedBundles,
                  failedBundles: &failedBundles)
         }
         // 4. Load Plugins
+        logLoad("Load user plugins:")
         for name in UI.cachedPlugins.keys {
             if let package = packages.first(where: { $0.isPlugin(name) }),
+               package.forwardDependencies == nil,
                let bundle = package.defaultBundle {
                 load(pluginBundle: bundle,
                      loadedBundles: &loadedBundles,
@@ -204,19 +211,55 @@ public final class MBPluginManager: NSObject {
             }
         }
         // 5. Load Plugins Again
+        logLoad("Load user plugins again:")
         UI.cachedPlugins.merge(UI.plugins) { ($0 + $1).withoutDuplicates() }
         for name in UI.cachedPlugins.keys {
             if let package = packages.first(where: { $0.isPlugin(name) }),
+               package.forwardDependencies == nil,
                let bundle = package.defaultBundle {
                 load(pluginBundle: bundle,
                      loadedBundles: &loadedBundles,
                      failedBundles: &failedBundles)
             }
         }
-
+        // 6. Load Activated Plugins With Forward Dependencies
+        logLoad("Load plugins with forward dependencies:")
+        var forwardPackages = packages.filter { $0.forwardDependencies != nil }.filter { package in
+            return package.required || UI.cachedPlugins.contains { package.isPlugin($0.key) }
+        }
+        while true {
+            var loaded = false
+            for package in Array(forwardPackages) {
+                guard let forwardDependencies = package.forwardDependencies,
+                      forwardPackages.count > 0 else {
+                    continue
+                }
+                let satisfied = self.isSatisfied(forwardDependencies, in: loadedBundles.compactMap(\.package))
+                if satisfied, let bundle = package.defaultBundle {
+                    forwardPackages.removeAll(package)
+                    if load(pluginBundle: bundle,
+                            loadedBundles: &loadedBundles,
+                            failedBundles: &failedBundles) {
+                        loaded = true
+                    }
+                }
+            }
+            if !loaded {
+                break
+            }
+        }
         if failedBundles.count > 0 {
             UI.log(warn: "Load Plugin Failed:", items: failedBundles.map { $0.name }, summary: false)
         }
+    }
+
+    private func isSatisfied(_ constraints: [String: String?], in packages: [MBPluginPackage]) -> Bool {
+        for (name, _) in constraints {
+            if !packages.contains(where: { $0.isPlugin(name) }) {
+                return false
+            }
+        }
+        return true
     }
 
     dynamic

@@ -11,7 +11,7 @@ import Foundation
 extension MBCommander {
     open class Setup: MBCommander {
 
-        public static let mboxDefaultBinDir = "/usr/local/bin"
+        public static let binDir = "/usr/local/bin"
 
         open class override var description: String? {
             return "Setup Command Line Tool"
@@ -25,20 +25,19 @@ extension MBCommander {
 
         open override class var options: [Option] {
             var options = super.options
-            options << Option("bin-dir", description: "Output the executable bin to specific directory. Default value: `\(mboxDefaultBinDir)`")
-            
+            options << Option("bin-dir", description: "Output the executable bin to specific directory. Default value: `\(binDir)`")
             return options
         }
 
         open override func setup() throws {
             self.zsh = self.shiftFlag("zsh")
-            self.binDir = self.shiftOption("bin-dir", default: Setup.mboxDefaultBinDir)
+            self.binDir = self.shiftOption("bin-dir", default: Setup.binDir)
             try super.setup()
             self.requireSetupLauncher = false
         }
 
         open var zsh: Bool = false
-        open var binDir: String = Setup.mboxDefaultBinDir
+        open var binDir: String = Setup.binDir
 
         open override func run() throws {
             try super.run()
@@ -52,10 +51,9 @@ extension MBCommander {
             try UI.section("Install mbox in `\(self.binDir)`") {
                 try MBCMD.installCommandLine(binDir: self.binDir)
             }
-            // TODO: Command Alias
-//            try UI.section("Source mbox function in `~/.profile`") {
-//                try MBCMD.installCommandLineAlias()
-//            }
+            try UI.section("Source mbox function in `~/.profile`") {
+                try MBCMD.installCommandLineAlias()
+            }
             UI.log(info: "")
             UI.log(info: "Setup Completed.")
         }

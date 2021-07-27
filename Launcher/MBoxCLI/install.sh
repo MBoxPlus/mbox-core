@@ -48,9 +48,5 @@ do
     fi
 done
 
-if [[ -z "$MBOX_GUI" ]]; then
-    mbox_print_title Install MBox CLI
-    "${MBOX_CORE_LAUNCHER}/../MBoxCLI" setup -v
-else
-    mbox_print_title Skip install mbox CLI
-fi
+mbox_print_title Install MBox CLI
+"${MBOX_CORE_LAUNCHER}/../MBoxCLI" setup -v

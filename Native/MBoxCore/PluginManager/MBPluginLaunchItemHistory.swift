@@ -17,7 +17,7 @@ extension MBPluginLaunchItem {
             case requireUpdate = "Upgrade"
         }
 
-        public static let filePath = FileManager.home.appending(pathComponent: ".mbox/launcher.yml")
+        public static let filePath = MBSetting.globalDir.appending(pathComponent: "launcher.yml")
 
         public static var shared: History {
             return History.load(fromFile: filePath)

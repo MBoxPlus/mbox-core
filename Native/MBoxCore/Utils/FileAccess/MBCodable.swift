@@ -114,8 +114,8 @@ open class MBCodableObject: NSObject, MBCodable {
                 if var property = child.value as? CodableProperty {
                     if let label = child.label {
                         property.name = String(label.dropFirst())
-                        if property.key == nil {
-                            property.key = property.name!.convertSnakeCased()
+                        if property.keys.isEmpty {
+                            property.keys = [property.name!.convertSnakeCased()]
                         }
                     }
                     property.instance = self
@@ -182,6 +182,9 @@ extension Date: MBCodable {
 extension Array: MBCodable where Element: MBCodable {
 
     public static func load(fromObject object: Any) throws -> Self {
+        if let object = object as? Self {
+            return object
+        }
         if let object = object as? [Any] {
             return try object.compactMap {
                 try Element.load(fromObject: $0)

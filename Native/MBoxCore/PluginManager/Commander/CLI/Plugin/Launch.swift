@@ -26,14 +26,7 @@ extension MBCommander.Plugin {
             return options
         }
 
-        open override class var flags: [Flag] {
-            var flags = super.flags
-            flags << Flag("all", description: "All Plugins")
-            return flags
-        }
-
         open override func setup() throws {
-            self.all = self.shiftFlag("all")
             if let scriptName: String = self.shiftOption("script") {
                 guard let script = MBPluginLaunchItem.LauncherType.allCases.first(where: { $0.rawValue.lowercased() == scriptName.lowercased() }) else {
                     throw ArgumentError.invalidValue(value: scriptName, argument: "script")
@@ -53,7 +46,6 @@ extension MBCommander.Plugin {
         open var launcherItemNames: [String] = []
         open var launcherItems: [MBPluginLaunchItem] = []
         open var script: MBPluginLaunchItem.LauncherType?
-        open var all: Bool = false
         open var roles: [String] = []
 
         open override func validate() throws {
@@ -78,7 +70,7 @@ extension MBCommander.Plugin {
                 }
             }
             if self.launcherItems.isEmpty {
-                let plugins = all ? Array(MBPluginManager.shared.packages) : UI.activedPlugins
+                let plugins = Array(MBPluginManager.shared.packages)
                 self.launcherItems = MBPluginManager.shared.launcherItem(for: plugins, roles: self.roles)
             }
         }

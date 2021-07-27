@@ -20,6 +20,9 @@
 		AB0FF4FD22CFB54C0011C0B8 /* MBRootCommander.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0FF4FC22CFB54C0011C0B8 /* MBRootCommander.swift */; };
 		AB0FF50322CFBA670011C0B8 /* MBCommanderRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0FF50222CFBA670011C0B8 /* MBCommanderRunner.swift */; };
 		AB0FF50522CFD7D50011C0B8 /* MBTTYLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0FF50422CFD7D50011C0B8 /* MBTTYLogger.swift */; };
+		AB24BB51268F3E8C008A73BB /* LoadBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB24BB50268F3E8C008A73BB /* LoadBundle.swift */; };
+		AB24BB52268F3E8C008A73BB /* LoadBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB24BB50268F3E8C008A73BB /* LoadBundle.swift */; };
+		AB24BB56268F3F5C008A73BB /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB24BB54268F3F5C008A73BB /* main.swift */; };
 		AB282818229D46ED003084EF /* MBoxCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB28280E229D46ED003084EF /* MBoxCore.framework */; };
 		AB28281F229D46ED003084EF /* MBoxCore.h in Headers */ = {isa = PBXBuildFile; fileRef = AB282811229D46ED003084EF /* MBoxCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AB292672239E7CB5005212E2 /* SignedIntegerExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB292652239E7CB5005212E2 /* SignedIntegerExtensions.swift */; };
@@ -64,16 +67,17 @@
 		AB4A30DD22B39E5D005F445B /* MBCMD.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4A30DC22B39E5C005F445B /* MBCMD.swift */; };
 		AB4A30DF22B3AA9B005F445B /* RSyncCMD.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4A30DE22B3AA9B005F445B /* RSyncCMD.swift */; };
 		AB4A30FA22B658F9005F445B /* GitURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4A30F922B658F9005F445B /* GitURL.swift */; };
+		AB525BB5268B182D00227764 /* sourced.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = AB525BB4268B181400227764 /* sourced.sh */; };
 		AB5AF8C723CC7C7A00C68E70 /* MBCodableArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB5AF8C623CC7C7A00C68E70 /* MBCodableArray.swift */; };
 		AB5E306522EC8A73004F716F /* String+Crypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB5E306422EC8A73004F716F /* String+Crypto.swift */; };
 		AB5E306722EC8AAC004F716F /* Data+Crypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB5E306622EC8AAC004F716F /* Data+Crypto.swift */; };
 		AB6293B723000EC400F95DB8 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB6293B623000EC400F95DB8 /* main.swift */; };
-		AB6293BB23000F3F00F95DB8 /* MBoxCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB28280E229D46ED003084EF /* MBoxCore.framework */; };
 		AB64A17422A8F0DC00FD06FC /* MBCommanderGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB64A17322A8F0DC00FD06FC /* MBCommanderGroup.swift */; };
 		AB64A17922B0F66900FD06FC /* String+Just.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB64A17822B0F66900FD06FC /* String+Just.swift */; };
 		AB64A17B22B0FB4300FD06FC /* Operator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB64A17A22B0FB4300FD06FC /* Operator.swift */; };
 		AB6D76142304803B003A0EA1 /* MBoxCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB6D76132304803B003A0EA1 /* MBoxCore.swift */; };
-		AB6D761F230BDB1A003A0EA1 /* mbox.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = AB3526FF22D1F6850012520B /* mbox.sh */; };
+		AB6ED0E22684403E0057669F /* MBEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB6ED0E12684403E0057669F /* MBEnvironment.swift */; };
+		AB6ED0E4268440A80057669F /* MBConfProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB6ED0E3268440A80057669F /* MBConfProtocol.swift */; };
 		AB719530231FFA490079935A /* MBCoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB71952F231FFA490079935A /* MBCoder.swift */; };
 		AB71954C232006710079935A /* EnvironmentVariable.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB719533232006710079935A /* EnvironmentVariable.swift */; };
 		AB71954D232006710079935A /* UserDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB719535232006710079935A /* UserDefault.swift */; };
@@ -97,7 +101,7 @@
 		AB74D6B4229D49B70013751C /* String+Path.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D681229D49B70013751C /* String+Path.swift */; };
 		AB74D6B5229D49B70013751C /* String+Quote.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D682229D49B70013751C /* String+Quote.swift */; };
 		AB74D6B6229D49B70013751C /* AssociateObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D683229D49B70013751C /* AssociateObject.swift */; };
-		AB74D6BD229D49B70013751C /* ExternalApplicationProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D68D229D49B70013751C /* ExternalApplicationProtocol.swift */; };
+		AB74D6BD229D49B70013751C /* ExternalApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D68D229D49B70013751C /* ExternalApp.swift */; };
 		AB74D6BE229D49B70013751C /* Finder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D68E229D49B70013751C /* Finder.swift */; };
 		AB74D6BF229D49B70013751C /* String+Character.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D68F229D49B70013751C /* String+Character.swift */; };
 		AB74D6C0229D49B70013751C /* Alamofire+SyncRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D690229D49B70013751C /* Alamofire+SyncRequest.swift */; };
@@ -127,9 +131,6 @@
 		AB9B4A6623C218E3001095BA /* NSString+charValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB9B4A6523C218E3001095BA /* NSString+charValue.swift */; };
 		ABA6D5A723A8D04D000BEE16 /* Dictionary+KeyPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA6D5A623A8D04D000BEE16 /* Dictionary+KeyPath.swift */; };
 		ABA6D5AB23AA0169000BEE16 /* Dictionary+Merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA6D5AA23AA0169000BEE16 /* Dictionary+Merge.swift */; };
-		ABA6E8F523FD41D10020E22D /* mdev.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = ABAECD7323F3D619008525C4 /* mdev.sh */; };
-		ABAECD6823F3AF77008525C4 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB6293B623000EC400F95DB8 /* main.swift */; };
-		ABAECD6A23F3AF77008525C4 /* MBoxCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AB28280E229D46ED003084EF /* MBoxCore.framework */; };
 		ABB08E742327DAB600A5DF22 /* ThenExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB08E732327DAB600A5DF22 /* ThenExtension.swift */; };
 		ABB22A22262D90B70024F725 /* ResultExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB22A21262D90B70024F725 /* ResultExtension.swift */; };
 		ABB4BD0624C6E0E200B755C8 /* MBPluginLaunchItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABB4BD0524C6E0E200B755C8 /* MBPluginLaunchItem.swift */; };
@@ -179,7 +180,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				AB6D761F230BDB1A003A0EA1 /* mbox.sh in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -189,7 +189,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				ABA6E8F523FD41D10020E22D /* mdev.sh in CopyFiles */,
+				AB525BB5268B182D00227764 /* sourced.sh in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -227,6 +227,9 @@
 		AB0FF4FC22CFB54C0011C0B8 /* MBRootCommander.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBRootCommander.swift; sourceTree = "<group>"; };
 		AB0FF50222CFBA670011C0B8 /* MBCommanderRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBCommanderRunner.swift; sourceTree = "<group>"; };
 		AB0FF50422CFD7D50011C0B8 /* MBTTYLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBTTYLogger.swift; sourceTree = "<group>"; };
+		AB24BB4E268F1993008A73BB /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		AB24BB50268F3E8C008A73BB /* LoadBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadBundle.swift; sourceTree = "<group>"; };
+		AB24BB54268F3F5C008A73BB /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		AB28280E229D46ED003084EF /* MBoxCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MBoxCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB282811229D46ED003084EF /* MBoxCore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MBoxCore.h; sourceTree = "<group>"; };
 		AB282812229D46ED003084EF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -265,7 +268,6 @@
 		AB292671239E7CB5005212E2 /* CalendarExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CalendarExtensions.swift; sourceTree = "<group>"; };
 		AB2B6E822362C8A200B86184 /* Open.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Open.swift; sourceTree = "<group>"; };
 		AB2CCFA7231E90E70081EF1B /* MBCodableProperty.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBCodableProperty.swift; sourceTree = "<group>"; };
-		AB3526FF22D1F6850012520B /* mbox.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = mbox.sh; sourceTree = "<group>"; };
 		AB35C466230D3BCE00FE97CC /* Plugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plugin.swift; sourceTree = "<group>"; };
 		AB35C469230D3C2A00FE97CC /* List.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = List.swift; sourceTree = "<group>"; };
 		AB36B1EE2563E2C200DC9DBA /* Disable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Disable.swift; sourceTree = "<group>"; };
@@ -274,6 +276,7 @@
 		AB4A30DC22B39E5C005F445B /* MBCMD.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBCMD.swift; sourceTree = "<group>"; };
 		AB4A30DE22B3AA9B005F445B /* RSyncCMD.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RSyncCMD.swift; sourceTree = "<group>"; };
 		AB4A30F922B658F9005F445B /* GitURL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GitURL.swift; sourceTree = "<group>"; };
+		AB525BB4268B181400227764 /* sourced.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = sourced.sh; sourceTree = "<group>"; };
 		AB5AF8C623CC7C7A00C68E70 /* MBCodableArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBCodableArray.swift; sourceTree = "<group>"; };
 		AB5E306422EC8A73004F716F /* String+Crypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Crypto.swift"; sourceTree = "<group>"; };
 		AB5E306622EC8AAC004F716F /* Data+Crypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Crypto.swift"; sourceTree = "<group>"; };
@@ -283,6 +286,8 @@
 		AB64A17822B0F66900FD06FC /* String+Just.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Just.swift"; sourceTree = "<group>"; };
 		AB64A17A22B0FB4300FD06FC /* Operator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Operator.swift; sourceTree = "<group>"; };
 		AB6D76132304803B003A0EA1 /* MBoxCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBoxCore.swift; sourceTree = "<group>"; };
+		AB6ED0E12684403E0057669F /* MBEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBEnvironment.swift; sourceTree = "<group>"; };
+		AB6ED0E3268440A80057669F /* MBConfProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBConfProtocol.swift; sourceTree = "<group>"; };
 		AB71952F231FFA490079935A /* MBCoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBCoder.swift; sourceTree = "<group>"; };
 		AB719533232006710079935A /* EnvironmentVariable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EnvironmentVariable.swift; sourceTree = "<group>"; };
 		AB719535232006710079935A /* UserDefault.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserDefault.swift; sourceTree = "<group>"; };
@@ -306,7 +311,7 @@
 		AB74D681229D49B70013751C /* String+Path.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Path.swift"; sourceTree = "<group>"; };
 		AB74D682229D49B70013751C /* String+Quote.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Quote.swift"; sourceTree = "<group>"; };
 		AB74D683229D49B70013751C /* AssociateObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AssociateObject.swift; sourceTree = "<group>"; };
-		AB74D68D229D49B70013751C /* ExternalApplicationProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExternalApplicationProtocol.swift; sourceTree = "<group>"; };
+		AB74D68D229D49B70013751C /* ExternalApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExternalApp.swift; sourceTree = "<group>"; };
 		AB74D68E229D49B70013751C /* Finder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Finder.swift; sourceTree = "<group>"; };
 		AB74D68F229D49B70013751C /* String+Character.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Character.swift"; sourceTree = "<group>"; };
 		AB74D690229D49B70013751C /* Alamofire+SyncRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Alamofire+SyncRequest.swift"; sourceTree = "<group>"; };
@@ -341,7 +346,6 @@
 		ABA6D5AA23AA0169000BEE16 /* Dictionary+Merge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dictionary+Merge.swift"; sourceTree = "<group>"; };
 		ABAAB1C622A65D8C00A1D29A /* MBoxCore.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; fileEncoding = 4; indentWidth = 2; path = MBoxCore.podspec; sourceTree = SOURCE_ROOT; tabWidth = 2; };
 		ABAECD7223F3AF77008525C4 /* MDevCLI */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MDevCLI; sourceTree = BUILT_PRODUCTS_DIR; };
-		ABAECD7323F3D619008525C4 /* mdev.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = mdev.sh; sourceTree = "<group>"; };
 		ABB08E732327DAB600A5DF22 /* ThenExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThenExtension.swift; sourceTree = "<group>"; };
 		ABB22A21262D90B70024F725 /* ResultExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultExtension.swift; sourceTree = "<group>"; };
 		ABB4BD0524C6E0E200B755C8 /* MBPluginLaunchItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBPluginLaunchItem.swift; sourceTree = "<group>"; };
@@ -397,7 +401,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AB6293BB23000F3F00F95DB8 /* MBoxCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -405,7 +408,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ABAECD6A23F3AF77008525C4 /* MBoxCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -437,6 +439,14 @@
 			path = User;
 			sourceTree = "<group>";
 		};
+		AB24BB53268F3F4C008A73BB /* MDevCLI */ = {
+			isa = PBXGroup;
+			children = (
+				AB24BB54268F3F5C008A73BB /* main.swift */,
+			);
+			path = MDevCLI;
+			sourceTree = "<group>";
+		};
 		AB282804229D46ED003084EF = {
 			isa = PBXGroup;
 			children = (
@@ -448,6 +458,7 @@
 				AB282810229D46ED003084EF /* MBoxCore */,
 				AB28281B229D46ED003084EF /* MBoxCoreTests */,
 				AB6293B523000EC400F95DB8 /* MBoxCLI */,
+				AB24BB53268F3F4C008A73BB /* MDevCLI */,
 				AB28280F229D46ED003084EF /* Products */,
 				B8BAE7DC549023177A7236FB /* Pods */,
 				E6980C468A8C9312652897C4 /* Frameworks */,
@@ -591,9 +602,9 @@
 		AB6293B523000EC400F95DB8 /* MBoxCLI */ = {
 			isa = PBXGroup;
 			children = (
-				AB3526FF22D1F6850012520B /* mbox.sh */,
-				ABAECD7323F3D619008525C4 /* mdev.sh */,
+				AB525BB4268B181400227764 /* sourced.sh */,
 				AB6293B623000EC400F95DB8 /* main.swift */,
+				AB24BB50268F3E8C008A73BB /* LoadBundle.swift */,
 			);
 			path = MBoxCLI;
 			sourceTree = "<group>";
@@ -764,7 +775,7 @@
 		AB74D684229D49B70013751C /* External Application */ = {
 			isa = PBXGroup;
 			children = (
-				AB74D68D229D49B70013751C /* ExternalApplicationProtocol.swift */,
+				AB74D68D229D49B70013751C /* ExternalApp.swift */,
 				AB74D68E229D49B70013751C /* Finder.swift */,
 			);
 			path = "External Application";
@@ -776,6 +787,7 @@
 				AB74D850229E60EF0013751C /* MBFileProtocol.swift */,
 				AB74D852229E60EF0013751C /* MBJSONProtocol.swift */,
 				AB74D851229E60EF0013751C /* MBYAMLProtocol.swift */,
+				AB6ED0E3268440A80057669F /* MBConfProtocol.swift */,
 				AB74D6DB229D4C3C0013751C /* MBUserDefault.swift */,
 				ABE4A91B231BBAA4008DFBE7 /* MBCodable.swift */,
 				AB5AF8C623CC7C7A00C68E70 /* MBCodableArray.swift */,
@@ -807,6 +819,7 @@
 				ABC0AE5623A62F3F004831A8 /* MBSetting.swift */,
 				AB74D82C229E369A0013751C /* MBSession.swift */,
 				AB74D829229E369A0013751C /* MBSession+Logger.swift */,
+				AB6ED0E12684403E0057669F /* MBEnvironment.swift */,
 			);
 			path = Session;
 			sourceTree = "<group>";
@@ -889,6 +902,7 @@
 		E6980C468A8C9312652897C4 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AB24BB4E268F1993008A73BB /* Foundation.framework */,
 				6BE2A7A30D42143AB017D017 /* Pods_MBoxCore.framework */,
 				C03F6CCCFF229526EA98C41E /* Pods_MBoxCoreTests.framework */,
 				59FAC2B4991DD766EB067344 /* Pods_MBoxNodeAPI.framework */,
@@ -1153,6 +1167,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AB6ED0E4268440A80057669F /* MBConfProtocol.swift in Sources */,
 				AB292677239E7CB5005212E2 /* BinaryFloatingPointExtensions.swift in Sources */,
 				AB74D6C8229D49B70013751C /* DispatchQueueSafe.swift in Sources */,
 				AB292678239E7CB5005212E2 /* FloatExtensions.swift in Sources */,
@@ -1203,6 +1218,7 @@
 				259820B124594F9B00D473C8 /* MBPluginSettingSchema.swift in Sources */,
 				AB74D6BE229D49B70013751C /* Finder.swift in Sources */,
 				AB74D6AD229D49B70013751C /* NSObject+Bundle.swift in Sources */,
+				AB6ED0E22684403E0057669F /* MBEnvironment.swift in Sources */,
 				AB29267D239E7CB5005212E2 /* StringExtensions.swift in Sources */,
 				AB74D853229E60EF0013751C /* MBFileProtocol.swift in Sources */,
 				AB29268D239E7CB5005212E2 /* LocaleExtensions.swift in Sources */,
@@ -1228,12 +1244,13 @@
 				AB0FF50522CFD7D50011C0B8 /* MBTTYLogger.swift in Sources */,
 				AB74D80B229E2F680013751C /* MBPluginManager.swift in Sources */,
 				AB29267A239E7CB5005212E2 /* MutableCollectionExtensions.swift in Sources */,
+				ABB228F6262873A40024F725 /* MBPluginVersionController.swift in Sources */,
 				258589CE244020F6004D459D /* String+Version.swift in Sources */,
 				AB74D6C0229D49B70013751C /* Alamofire+SyncRequest.swift in Sources */,
 				ABB4BD0624C6E0E200B755C8 /* MBPluginLaunchItem.swift in Sources */,
 				AB0FF4F922CFB0860011C0B8 /* ANSI.swift in Sources */,
 				AB315CEB23390DFA00A73EF6 /* Env.swift in Sources */,
-				AB74D6BD229D49B70013751C /* ExternalApplicationProtocol.swift in Sources */,
+				AB74D6BD229D49B70013751C /* ExternalApp.swift in Sources */,
 				AB719552232006710079935A /* Copying.swift in Sources */,
 				AB292673239E7CB5005212E2 /* BidirectionalCollectionExtensions.swift in Sources */,
 				AB4A30FA22B658F9005F445B /* GitURL.swift in Sources */,
@@ -1307,6 +1324,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AB6293B723000EC400F95DB8 /* main.swift in Sources */,
+				AB24BB51268F3E8C008A73BB /* LoadBundle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1314,7 +1332,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ABAECD6823F3AF77008525C4 /* main.swift in Sources */,
+				AB24BB56268F3F5C008A73BB /* main.swift in Sources */,
+				AB24BB52268F3E8C008A73BB /* LoadBundle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

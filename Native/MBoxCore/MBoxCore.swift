@@ -8,8 +8,17 @@
 
 import Foundation
 
+var run = false
+
 @objc(MBoxCore)
 open class MBoxCore: NSObject, MBPluginProtocol {
+    override init() {
+        super.init()
+        if !run {
+            run = true
+            runCommander()
+        }
+    }
 
     dynamic
     public func registerCommanders() {
@@ -25,12 +34,9 @@ open class MBoxCore: NSObject, MBPluginProtocol {
         MBCommanderGroup.shared.addCommand(MBCommander.Config.self)
     }
 
+    dynamic
     public static var version: String {
-        var info = ""
-        if let app = Bundle.app {
-            info.append("GUI Core Version: \(app.shortVersion), ")
-        }
-        info.append("CLI Core Version: \(self.bundle.shortVersion)")
+        var info = "CLI Core Version: \(self.bundle.shortVersion)"
 
         if let package = MBoxCore.pluginPackage,
             let commitDate = package.commitDate {

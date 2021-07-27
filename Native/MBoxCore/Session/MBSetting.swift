@@ -59,23 +59,22 @@ open class MBSetting: MBCodableObject, MBJSONProtocol {
         return "MBox\(name.capitalizedFirstLetter)"
     }
 
-    @Codable(key: "plugins2", cacheTransform: true, getterTransform: { (value, instance) in
-        guard let self = instance as? MBSetting,
-              let v = value ?? self.dictionary["plugins"] else {
-            return [:]
+    @Codable(keys: ["plugins2", "plugins"], mainKey: "plugins", getterTransform: { (value, instance) in
+        guard let self = instance as? MBSetting else {
+            return nil
         }
-        if let v = v as? [String] {
+        if let v = value as? [String] {
             var result = [String: PluginDescriptor]()
             for name in v {
                 result[MBSetting.pluginName(for: name)] = PluginDescriptor()
             }
             return result
-        } else if let hash = v as? [String: [String: Any]] {
+        } else if let hash = value as? [String: [String: Any]] {
             return hash.mapKeysAndValues { (k, v) in
                 return (MBSetting.pluginName(for: k), PluginDescriptor(dictionary: v))
             }
         }
-        return [:]
+        return nil
     })
     open var plugins: [String: PluginDescriptor]?
 
@@ -158,5 +157,21 @@ extension MBSetting {
     dynamic
     public static var all: [MBSetting] {
         return [global]
+    }
+}
+
+extension MBSetting {
+    public class Core: MBCodableObject {
+        @Codable(key: "dev-root")
+        public var devRoot: String?
+    }
+
+    public var core: Core? {
+        set {
+            self.dictionary["core"] = newValue
+        }
+        get {
+            return self.value(forPath: "core")
+        }
     }
 }

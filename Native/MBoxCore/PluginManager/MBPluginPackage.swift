@@ -10,6 +10,9 @@ import Foundation
 
 public final class MBPluginPackage: MBCodableObject, MBYAMLProtocol {
 
+    @Codable(key: "FORWARD_DEPENDENCIES")
+    public var forwardDependencies: [String: String?]?
+
     @Codable(key: "DEPENDENCIES")
     public var dependencies: [String]?
 
@@ -32,6 +35,9 @@ public final class MBPluginPackage: MBCodableObject, MBYAMLProtocol {
 
     @Codable(key: "CLI")
     public var CLI: Bool?
+
+    @Codable(key: "SWIFT_VERSION")
+    public var swiftVersion: String?
 
     @Codable(key: "GUI")
     public var GUI: Bool?
@@ -143,7 +149,7 @@ public final class MBPluginPackage: MBCodableObject, MBYAMLProtocol {
 
     public var isInUserDirectory: Bool = false
 
-    public lazy var dataDir: String = FileManager.home.appending(pathComponent: ".mbox/data/\(self.name)")
+    public lazy var dataDir: String = MBSetting.globalDir.appending(pathComponent: "data/\(self.name)")
 
     // MARK: - Native
     public lazy var nativeBundleDir: String? = {
@@ -265,11 +271,23 @@ public final class MBPluginPackage: MBCodableObject, MBYAMLProtocol {
         if let commitDate = self.commitDate {
             desc <<< "  DATE: \(commitDate)"
         }
-        if let dps = self.dependencies, !dps.isEmpty {
+        if self.required {
+            desc <<< "  REQUIRED: true"
+        }
+        let fowardDps = self.forwardDependencies?.map { $0.key } ?? []
+        let dps = (self.dependencies ?? []) + fowardDps
+        if !dps.isEmpty {
             desc <<< "  DEPENDENCIES:"
-            for dp in dps {
-                desc <<< "    - \(dp)"
+            for dp in dps.sorted() {
+                if fowardDps.contains(dp) {
+                    desc <<< "    - \(dp) (Forward)"
+                } else {
+                    desc <<< "    - \(dp)"
+                }
             }
+        }
+        if let forward = self.forwardDependencies, !forward.isEmpty {
+
         }
         if let required = required, !required.isEmpty {
             desc <<< "  REQUIRED BY:"

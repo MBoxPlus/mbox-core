@@ -101,7 +101,8 @@ extension MBSession {
         }
     }
 
-    open func gets<T: CustomStringConvertible>(_ message: String, items: [T]) -> T {
+    open func gets<T: CustomStringConvertible>(_ message: String, items: [T]) throws -> T {
+        if UI.fromGUI { throw RuntimeError("Could not read stdin in App.") }
         for (index, item) in items.enumerated() {
             log(info: "\((index + 1).string.ANSI(.cyan)). \(item.description)")
         }

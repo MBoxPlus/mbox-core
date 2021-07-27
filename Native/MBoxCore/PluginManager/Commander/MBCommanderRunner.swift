@@ -107,9 +107,19 @@ public func runCommander(_ arguments: [String]) throws -> Int32 {
     if let root = try? parser.option(for: "root") {
         UI.rootPath = root.expandingTildeInPath
     }
-    if ProcessInfo.processInfo.arguments.first?.lastPathComponent == "MDevCLI" {
-        guard let path = try? parser.option(for: "dev-root") ?? ProcessInfo.processInfo.environment["MBOX2_DEVELOPMENT_ROOT"] else {
-            print("[ERROR] `mdev` require the `--dev-root` option or `MBOX2_DEVELOPMENT_ROOT` environment variable.")
+    if let home = try? parser.option(for: "home") {
+        MBSetting.globalDir = home
+    }
+    if let exeName = ProcessInfo.processInfo.arguments.first?.lastPathComponent,
+       exeName == "MDevCLI" || exeName == "mdev" {
+        guard let path = try? parser.option(for: "dev-root") ??
+                MBSetting.global.core?.devRoot,
+              !path.isEmpty else {
+            print("[ERROR] require configuration for `mbox config core.dev-root`.")
+            exit(253)
+        }
+        if !path.isDirectory {
+            print("[ERROR] `dev-root` is not directory.")
             exit(253)
         }
         UI.devRoot = path.expandingTildeInPath

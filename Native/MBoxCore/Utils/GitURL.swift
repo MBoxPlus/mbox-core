@@ -49,6 +49,10 @@ public struct MBGitURL: Equatable, CustomStringConvertible {
         host = matchData[5]
         group = matchData[6]
         project = matchData[7]
+
+        if user.isEmpty {
+            user = "git"
+        }
     }
 
     public private(set) var url: String

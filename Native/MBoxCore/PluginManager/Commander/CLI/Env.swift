@@ -72,7 +72,7 @@ extension MBCommander {
         }
 
         open func showPlugins() throws {
-            let packages = UI.activedPlugins.sorted(by: \.name)
+            let packages = MBPluginManager.shared.packages.sorted(by: \.name)
             if UI.apiFormatter == .plain {
                 UI.log(api: packages.map { $0.path })
                 return
