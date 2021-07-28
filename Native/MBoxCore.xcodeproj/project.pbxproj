@@ -1113,7 +1113,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = "/bin/sh -li";
-			shellScript = "export LANG=en_US.UTF-8\nexport LANGUAGE=en_US.UTF-8\nexport LC_ALL=en_US.UTF-8\necho ${SRCROOT}/../Launcher\nruby \"${PODS_ROOT}/MBoxCore/repackage-dylibs.rb\"\n";
+			shellScript = "export LANG=en_US.UTF-8\nexport LANGUAGE=en_US.UTF-8\nexport LC_ALL=en_US.UTF-8\ncd \"${SRCROOT}/../..\"\nbundle exec ruby \"${PODS_ROOT}/MBoxCore/repackage-dylibs.rb\"\n";
 			showEnvVarsInLog = 0;
 		};
 		AC95B9780822CAD5316FFCFE /* [CP] Check Pods Manifest.lock */ = {
@@ -1244,7 +1244,6 @@
 				AB0FF50522CFD7D50011C0B8 /* MBTTYLogger.swift in Sources */,
 				AB74D80B229E2F680013751C /* MBPluginManager.swift in Sources */,
 				AB29267A239E7CB5005212E2 /* MutableCollectionExtensions.swift in Sources */,
-				ABB228F6262873A40024F725 /* MBPluginVersionController.swift in Sources */,
 				258589CE244020F6004D459D /* String+Version.swift in Sources */,
 				AB74D6C0229D49B70013751C /* Alamofire+SyncRequest.swift in Sources */,
 				ABB4BD0624C6E0E200B755C8 /* MBPluginLaunchItem.swift in Sources */,
