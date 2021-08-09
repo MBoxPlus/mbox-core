@@ -39,7 +39,7 @@ extension MBCommander.Plugin {
                 self.roles = roles
             }
             self.launcherItemNames = self.shiftArguments("name")
-            self.requireSetupLauncher = false
+            UI.requireSetupLauncher = false
             try super.setup()
         }
 
@@ -50,28 +50,48 @@ extension MBCommander.Plugin {
 
         open override func validate() throws {
             try super.validate()
-            self.launcherItems = try self.launcherItemNames.flatMap { name -> [MBPluginLaunchItem] in
-                let names = name.split(separator: "/")
-                let pluginName = String(names.first!)
-                guard let plugin = MBPluginManager.shared.package(for: pluginName) else {
-                    throw ArgumentError.invalidValue(value: name, argument: "name")
-                }
-                if plugin.hasLauncher != true {
-                    throw UserError("[\(plugin.name)] No launcher in the plugin.")
-                }
-                if names.count == 1 {
-                    return plugin.launcherItems
-                } else {
-                    let itemName = String(names.last!)
-                    guard let item = plugin.launcherItems.first(where: { $0.itemName.lowercased() == itemName.lowercased() }) else {
-                        throw ArgumentError.invalidValue(value: name, argument: "name")
-                    }
-                    return [item]
-                }
+            self.launcherItems = try self.launcherItemNames.flatMap {
+                try self.launcherItem(for: $0)
             }
             if self.launcherItems.isEmpty {
                 let plugins = Array(MBPluginManager.shared.packages)
                 self.launcherItems = MBPluginManager.shared.launcherItem(for: plugins, roles: self.roles)
+                for name in MBPluginLaunchItem.History.shared.all.keys {
+                    let names = name.split(separator: "/")
+                    let pluginName = String(names.first!)
+                    guard plugins.contains(where: { $0.isPlugin(pluginName) }) else {
+                        continue
+                    }
+                    guard let items = try? self.launcherItem(for: name) else {
+                        MBPluginLaunchItem.History.uninstall(plugin: name)
+                        continue
+                    }
+                    for item in items {
+                        if !self.launcherItems.contains(item) {
+                            self.launcherItems.append(item)
+                        }
+                    }
+                }
+            }
+        }
+
+        open func launcherItem(for name: String) throws -> [MBPluginLaunchItem] {
+            let names = name.split(separator: "/")
+            let pluginName = String(names.first!)
+            guard let plugin = MBPluginManager.shared.package(for: pluginName) else {
+                throw ArgumentError.invalidValue(value: name, argument: "name")
+            }
+            if plugin.hasLauncher != true {
+                throw UserError("[\(plugin.name)] No launcher in the plugin.")
+            }
+            if names.count == 1 {
+                return plugin.launcherItems
+            } else {
+                let itemName = String(names.last!)
+                guard let item = plugin.launcherItems.first(where: { $0.itemName.lowercased() == itemName.lowercased() }) else {
+                    throw ArgumentError.invalidValue(value: name, argument: "name")
+                }
+                return [item]
             }
         }
 

@@ -13,16 +13,16 @@ Pod::Spec.new do |spec|
     The Core include many utils.
                    DESC
 
-  spec.homepage     = "https://github.com/MBoxSpace/#{name2}"
+  spec.homepage     = "https://github.com/MBoxPlus/#{name2}"
 
   spec.license      = "MIT"
   spec.author       = { `git config user.name`.strip => `git config user.email`.strip }
-  spec.source       = { :git => "git@github.com:MBoxSpace/#{name2}.git", :tag => "#{spec.version}" }
+  spec.source       = { :git => "git@github.com:MBoxPlus/#{name2}.git", :tag => "#{spec.version}" }
 
-  spec.default_subspec = 'Core'
+  spec.default_subspec = 'Default'
   spec.platform = :osx, '10.15'
 
-  spec.subspec 'Core' do |ss|
+  spec.subspec 'Default' do |ss|
     ss.source_files  = "#{name}/*.{h,m,swift}", "#{name}/**/*.{h,m,swift}"
 
     ss.user_target_xcconfig = {

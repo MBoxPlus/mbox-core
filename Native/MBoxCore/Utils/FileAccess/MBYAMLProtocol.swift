@@ -9,6 +9,20 @@
 import Foundation
 import Yams
 
+extension NSDictionary: NodeRepresentable {
+    /// This value's `Node` representation.
+    public func represented() throws -> Node {
+        return try (self as Dictionary).represented()
+    }
+}
+
+extension NSArray: NodeRepresentable {
+    /// This value's `Node` representation.
+    public func represented() throws -> Node {
+        return try (self as Array).represented()
+    }
+}
+
 extension NSString: ScalarRepresentable {
     /// This value's `Node.scalar` representation.
     public func represented() -> Node.Scalar {

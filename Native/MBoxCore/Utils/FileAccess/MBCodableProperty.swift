@@ -113,8 +113,8 @@ public class Codable<T: CodableType>: CodableProperty {
             }
 
             let (key, originValue) = self.fetchValue()
-            if transform {
-                return originValue as! T
+            if transform, let value = originValue as? T {
+                return value
             }
             var value: T
             if let getterTransform = self.getterTransform {

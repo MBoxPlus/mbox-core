@@ -10,10 +10,14 @@ import Foundation
 
 dynamic
 public func coder(for extension: String) -> MBCoder? {
-    switch `extension`.lowercased() {
+    var ext = `extension`.lowercased()
+    if !ext.hasPrefix(".") {
+        ext = ".\(ext)"
+    }
+    switch ext {
     case ".json":
         return MBJSONCoder.shared
-    case ".yml", ".yaml":
+    case ".yml", ".yaml", ".lock":
         return MBYAMLCoder.shared
     default:
         return nil

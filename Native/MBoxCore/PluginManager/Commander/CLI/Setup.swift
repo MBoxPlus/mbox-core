@@ -33,7 +33,7 @@ extension MBCommander {
             self.zsh = self.shiftFlag("zsh")
             self.binDir = self.shiftOption("bin-dir", default: Setup.binDir)
             try super.setup()
-            self.requireSetupLauncher = false
+            UI.requireSetupLauncher = false
         }
 
         open var zsh: Bool = false

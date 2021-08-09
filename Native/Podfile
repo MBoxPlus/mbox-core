@@ -7,10 +7,6 @@ inhibit_all_warnings!
 use_frameworks!
 
 target 'MBoxCore' do
-  podspec :subspec => 'Core'
+  podspec :subspec => 'Default'
   pod 'CocoaLumberjack/Swift', :git=>'git@github.com:Whirlwind/CocoaLumberjack.git', :branch=>'mbox2'
-end
-
-target 'MBoxCoreTests' do
-  pod 'Nimble'
 end

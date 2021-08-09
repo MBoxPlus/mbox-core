@@ -4,7 +4,6 @@ PODS:
   - CocoaLumberjack/Core (3.5.3)
   - CocoaLumberjack/Swift (3.5.3):
     - CocoaLumberjack/Core
-  - Nimble (9.0.0)
   - ObjCCommandLine (0.0.4)
   - Then (2.6.0)
   - Yams (4.0.3)
@@ -14,7 +13,6 @@ DEPENDENCIES:
   - BlueSignals (~> 1.0.20)
   - CocoaLumberjack/Swift
   - "CocoaLumberjack/Swift (from `git@github.com:Whirlwind/CocoaLumberjack.git`, branch `mbox2`)"
-  - Nimble
   - ObjCCommandLine
   - Then (~> 2.6.0)
   - Yams (~> 4.0)
@@ -23,7 +21,6 @@ SPEC REPOS:
   trunk:
     - Alamofire
     - BlueSignals
-    - Nimble
     - ObjCCommandLine
     - Then
     - Yams
@@ -42,11 +39,10 @@ SPEC CHECKSUMS:
   Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
   BlueSignals: a18937bb79a865022c85210b94a24cf270b4ea10
   CocoaLumberjack: a7872dad8251a714a74b16c78344b56a2cde3bd0
-  Nimble: 3b4ec3fd40f1dc178058e0981107721c615643d8
   ObjCCommandLine: f131274a69f68cb70dfeffec2da629e41a0ac9c9
   Then: 90cd104fd951cec1980a03f57704ad8f784d4d79
   Yams: 3d608cd9c8c0fbc1befafe6a2b9a6c6db5e325d5
 
-PODFILE CHECKSUM: dc0fcf51d49c507479d7a25f950edfef77ae0dc7
+PODFILE CHECKSUM: e10de934490360089958182bd34aeb0e21f77653
 
 COCOAPODS: 1.6.2

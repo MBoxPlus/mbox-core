@@ -271,9 +271,6 @@ public final class MBPluginPackage: MBCodableObject, MBYAMLProtocol {
         if let commitDate = self.commitDate {
             desc <<< "  DATE: \(commitDate)"
         }
-        if self.required {
-            desc <<< "  REQUIRED: true"
-        }
         let fowardDps = self.forwardDependencies?.map { $0.key } ?? []
         let dps = (self.dependencies ?? []) + fowardDps
         if !dps.isEmpty {

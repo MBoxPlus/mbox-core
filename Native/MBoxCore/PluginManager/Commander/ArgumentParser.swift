@@ -238,8 +238,8 @@ public final class ArgumentParser : NSObject, ArgumentConvertible {
 
             index += 1
         }
-
-        return false
+        let envName = "MBOX_\(name.uppercased().replacingOccurrences(of: "-", with: "_"))"
+        return ProcessInfo.processInfo.environment.has(key: envName)
     }
 
     /// Returns whether a flag was specified in the arguments

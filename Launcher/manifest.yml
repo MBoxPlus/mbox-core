@@ -4,7 +4,6 @@ Homebrew:
   dependencies:
     - MBoxCore/XcodeCLT
 rsync:
-  required: true
   dependencies:
     - MBoxCore/Homebrew
 XcodeCLT:

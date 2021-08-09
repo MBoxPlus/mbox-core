@@ -50,11 +50,6 @@ open class MBSession: NSObject {
         return result
     }
 
-    dynamic
-    public func requiredPlugins(_ packages: [MBPluginPackage]) -> [MBPluginPackage] {
-        return packages.filter { $0.required }
-    }
-
     public lazy var cachedPlugins: [String: [MBSetting.PluginDescriptor]] = {
         // 为了防止 Swift dynamic replacement 第一次未生效，故意执行两遍
         _ = self.plugins
@@ -66,6 +61,7 @@ open class MBSession: NSObject {
         MBPluginManager.shared.loadAll()
     }
 
+    open lazy var requireSetupLauncher = true
 
     // MARK: - Status
     public var statusCode: Int32 = 0

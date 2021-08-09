@@ -53,4 +53,14 @@ public final class MBPluginLaunchItem: MBCodableObject {
         cmd.env["MBOX_PLUGIN_NAME"] = self.pluginName
         return cmd.exec("sh ./\(scriptPath.lastPathComponent.quoted)")
     }
+
+    public override func isEqual(_ object: Any?) -> Bool {
+        if super.isEqual(object) {
+            return true
+        }
+        guard let other = object as? MBPluginLaunchItem else {
+            return false
+        }
+        return self.fullName.lowercased() == other.fullName.lowercased()
+    }
 }

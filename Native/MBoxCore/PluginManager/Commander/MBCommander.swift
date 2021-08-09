@@ -54,7 +54,7 @@ open class MBCommander: NSObject {
     dynamic
     open class var options: [Option] {
         return [
-            Option("api", description: "Output information with API format.", values: MBLoggerAPIFormatter.allCases.map { $0.rawValue }),
+            Option("api", description: "Output information with API format.", values: MBLoggerAPIFormatter.allCases.map { $0.rawValue }.sorted()),
             Option("root", description: "Set Root Directory"),
             Option("home", description: "Set Configuration Home Directory"),
         ]
@@ -125,11 +125,11 @@ open class MBCommander: NSObject {
 
     dynamic
     open func setup() throws {
-        if self.requireSetupLauncher {
+        if UI.requireSetupLauncher {
             if type(of: self) == MBCommander.self {
-                self.requireSetupLauncher = false
+                UI.requireSetupLauncher = false
             } else {
-                self.requireSetupLauncher = self.shiftFlag("launcher", default: true)
+                UI.requireSetupLauncher = self.shiftFlag("launcher", default: true)
             }
         }
     }
@@ -295,12 +295,11 @@ open class MBCommander: NSObject {
         }
     }
 
-    open lazy var requireSetupLauncher = true
     open lazy var launcherPlugins = Array(MBPluginManager.shared.packages)
 
     dynamic
     open func setupLauncher(force: Bool = false) throws {
-        if force || requireSetupLauncher {
+        if force || UI.requireSetupLauncher {
             try UI.with(pip: .ERR) {
                 try setupLauncher(plugins: self.launcherPlugins)
             }

@@ -122,8 +122,12 @@ extension MBSession {
                   function: StaticString = #function,
                   line: UInt = #line,
                   formatter: MBLoggerAPIFormatter? = nil) {
+        var formatter = formatter ?? self.apiFormatter
+        if formatter == .none {
+            formatter = .yaml
+        }
         let string: String
-        switch formatter ?? self.apiFormatter {
+        switch formatter {
         case .json:
             if let json = api as? [String: Any] {
                 string = json.toJSONString()!
@@ -139,7 +143,12 @@ extension MBSession {
                 string = "\(api)"
             }
         case .yaml:
-            string = (try? Yams.dump(object: api, sortKeys: true)) ?? ""
+            do {
+                string = try Yams.dump(object: api, sortKeys: true)
+            } catch {
+                self.log(error: error.localizedDescription)
+                string = "\(api)"
+            }
         default:
             string = "\(api)"
         }

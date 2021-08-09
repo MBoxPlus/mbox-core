@@ -70,58 +70,90 @@ public final class MBPluginManager: NSObject {
 
         logLoad("Search Plugins:")
 
-        var appPluginPaths = [String]()
-        if let appPluginPath = MBoxApp.path?.appending(pathComponent: "Contents/Resources/Plugins") {
-            appPluginPaths.append(appPluginPath)
-        }
-        let appPluginPath = Self.bundle.bundlePath.appending(pathComponent: "../..").cleanPath
-        if !appPluginPaths.contains(appPluginPath) {
-            appPluginPaths.append(appPluginPath)
-        }
-        for path in appPluginPaths {
-            logLoad("  \(path)")
-            plugins.merge(MBPluginPackage.search(directory: path)) { (a, b) in
-                return b
+        if let pluginPaths = try? UI.args.option(for: "plugin-paths", shift: true)?.split(separator: ":") {
+            for path in pluginPaths {
+                if let package = MBPluginPackage.from(directory: String(path)) {
+                    plugins[package.name] = package
+                }
             }
-        }
 
-        plugins.forEach { (_, v) in
-            v.isInApplication = true
-        }
-
-        let homePluginPath = MBSetting.globalDir.appending(pathComponent: "plugins")
-        logLoad("  \(homePluginPath)")
-        let globalPlugins = MBPluginPackage.search(directory: homePluginPath)
-        globalPlugins.forEach { (_, v) in
-            v.isInUserDirectory = true
-        }
-
-        plugins.merge(globalPlugins) { (a, b) -> MBPluginPackage in
-            return a.version.compare(b.version, options: .numeric) == .orderedDescending ? a : b
-        }
-
-        if let devRoot = UI.devRoot {
-            logLoad("  \(devRoot)")
-            var devPlugins = MBPluginPackage.search(directory: devRoot)
-            if let coreDev = devPlugins.removeValue(forKey: "MBoxCore") {
-                coreDev.nativeBundleDir = self.bundle.bundlePath.deletingLastPathComponent
-                plugins[coreDev.name] = coreDev
-            }
-            for (_, v) in devPlugins {
-                v.isUnderDevelopment = true
-                if v.CLI == true,
-                   v.nativeBundleDir == nil {
-                    let framework = devRoot.appending(pathComponent: "build/\(v.name)/\(v.name).framework")
-                    if framework.isDirectory {
-                        v.nativeBundleDir = framework.deletingLastPathComponent
+            if let devRoot = UI.devRoot {
+                logLoad("  \(devRoot)")
+                let devPlugins = MBPluginPackage.search(directory: devRoot)
+                for (name, v) in devPlugins {
+                    guard plugins.has(key: name) else { continue }
+                    v.isUnderDevelopment = true
+                    if v.CLI == true,
+                       v.nativeBundleDir == nil {
+                        let framework = devRoot.appending(pathComponent: "build/\(v.name)/\(v.name).framework")
+                        if framework.isDirectory {
+                            v.nativeBundleDir = framework.deletingLastPathComponent
+                        }
                     }
+                    if v.CLI == true,
+                       v.nativeBundleDir == nil,
+                       let releasePlugin = plugins[v.name] {
+                        v.nativeBundleDir = releasePlugin.nativeBundleDir
+                    }
+                    plugins[v.name] = v
                 }
-                if v.CLI == true,
-                   v.nativeBundleDir == nil,
-                   let releasePlugin = plugins[v.name] {
-                    v.nativeBundleDir = releasePlugin.nativeBundleDir
+            }
+
+        } else {
+
+            var appPluginPaths = [String]()
+            if let appPluginPath = MBoxApp.path?.appending(pathComponent: "Contents/Resources/Plugins") {
+                appPluginPaths.append(appPluginPath)
+            }
+            let appPluginPath = Self.bundle.bundlePath.appending(pathComponent: "../..").cleanPath
+            if !appPluginPaths.contains(appPluginPath) {
+                appPluginPaths.append(appPluginPath)
+            }
+            for path in appPluginPaths {
+                logLoad("  \(path)")
+                plugins.merge(MBPluginPackage.search(directory: path)) { (a, b) in
+                    return b
                 }
-                plugins[v.name] = v
+            }
+
+            plugins.forEach { (_, v) in
+                v.isInApplication = true
+            }
+
+            let homePluginPath = MBSetting.globalDir.appending(pathComponent: "plugins")
+            logLoad("  \(homePluginPath)")
+            let globalPlugins = MBPluginPackage.search(directory: homePluginPath)
+            globalPlugins.forEach { (_, v) in
+                v.isInUserDirectory = true
+            }
+
+            plugins.merge(globalPlugins) { (a, b) -> MBPluginPackage in
+                return a.version.compare(b.version, options: .numeric) == .orderedDescending ? a : b
+            }
+
+            if let devRoot = UI.devRoot {
+                logLoad("  \(devRoot)")
+                var devPlugins = MBPluginPackage.search(directory: devRoot)
+                if let coreDev = devPlugins.removeValue(forKey: "MBoxCore") {
+                    coreDev.nativeBundleDir = self.bundle.bundlePath.deletingLastPathComponent
+                    plugins[coreDev.name] = coreDev
+                }
+                for (_, v) in devPlugins {
+                    v.isUnderDevelopment = true
+                    if v.CLI == true,
+                       v.nativeBundleDir == nil {
+                        let framework = devRoot.appending(pathComponent: "build/\(v.name)/\(v.name).framework")
+                        if framework.isDirectory {
+                            v.nativeBundleDir = framework.deletingLastPathComponent
+                        }
+                    }
+                    if v.CLI == true,
+                       v.nativeBundleDir == nil,
+                       let releasePlugin = plugins[v.name] {
+                        v.nativeBundleDir = releasePlugin.nativeBundleDir
+                    }
+                    plugins[v.name] = v
+                }
             }
         }
 
@@ -149,6 +181,9 @@ public final class MBPluginManager: NSObject {
     public func load(pluginBundle: MBPluginPackage.PluginBundle,
                      loadedBundles: inout Set<MBPluginPackage.PluginBundle>,
                      failedBundles: inout Set<MBPluginPackage.PluginBundle>) -> Bool {
+        if loadedBundles.contains(pluginBundle) {
+            return true
+        }
         pluginBundle.dependencies?.forEach({ name in
             guard let bundle = self.pluginBundle(for: name) else { return }
             load(pluginBundle: bundle,
@@ -193,7 +228,7 @@ public final class MBPluginManager: NSObject {
         }
         // 3. Load Required Packages ( without forward dependencies )
         logLoad("Load required plugin:")
-        let requiredBundles = UI.requiredPlugins(Array(packages)).filter{ $0.forwardDependencies == nil }.compactMap { $0.defaultBundle }
+        let requiredBundles = packages.filter{ $0.required && $0.forwardDependencies == nil }.compactMap { $0.defaultBundle }
         for bundle in requiredBundles {
             load(pluginBundle: bundle,
                  loadedBundles: &loadedBundles,
@@ -203,11 +238,14 @@ public final class MBPluginManager: NSObject {
         logLoad("Load user plugins:")
         for name in UI.cachedPlugins.keys {
             if let package = packages.first(where: { $0.isPlugin(name) }),
-               package.forwardDependencies == nil,
-               let bundle = package.defaultBundle {
-                load(pluginBundle: bundle,
-                     loadedBundles: &loadedBundles,
-                     failedBundles: &failedBundles)
+               package.forwardDependencies == nil {
+                if let bundle = package.defaultBundle {
+                    load(pluginBundle: bundle,
+                         loadedBundles: &loadedBundles,
+                         failedBundles: &failedBundles)
+                } else {
+                    self.packages.insert(package)
+                }
             }
         }
         // 5. Load Plugins Again
@@ -215,17 +253,23 @@ public final class MBPluginManager: NSObject {
         UI.cachedPlugins.merge(UI.plugins) { ($0 + $1).withoutDuplicates() }
         for name in UI.cachedPlugins.keys {
             if let package = packages.first(where: { $0.isPlugin(name) }),
-               package.forwardDependencies == nil,
-               let bundle = package.defaultBundle {
+               package.forwardDependencies == nil {
+               if let bundle = package.defaultBundle {
                 load(pluginBundle: bundle,
                      loadedBundles: &loadedBundles,
                      failedBundles: &failedBundles)
+               } else {
+                self.packages.insert(package)
+               }
             }
         }
         // 6. Load Activated Plugins With Forward Dependencies
         logLoad("Load plugins with forward dependencies:")
         var forwardPackages = packages.filter { $0.forwardDependencies != nil }.filter { package in
-            return package.required || UI.cachedPlugins.contains { package.isPlugin($0.key) }
+            if package.required {
+                return true
+            }
+            return UI.cachedPlugins.keys.contains { package.isPlugin($0) }
         }
         while true {
             var loaded = false
@@ -234,7 +278,9 @@ public final class MBPluginManager: NSObject {
                       forwardPackages.count > 0 else {
                     continue
                 }
-                let satisfied = self.isSatisfied(forwardDependencies, in: loadedBundles.compactMap(\.package))
+                let satisfied = self.isSatisfied(forwardDependencies,
+                                                 in: loadedBundles.filter { $0.name.isEmpty }
+                                                    .compactMap(\.package))
                 if satisfied, let bundle = package.defaultBundle {
                     forwardPackages.removeAll(package)
                     if load(pluginBundle: bundle,
