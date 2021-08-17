@@ -39,8 +39,6 @@ Pod::Spec.new do |spec|
     }
     # ss.resources = "Resources/*.png"
 
-    ss.preserve_paths = ['Native/repackage-dylibs.rb', 'Native/repackage-dylibs.input.xcfilelist', 'Native/repackage-dylibs.output.xcfilelist']
-
     # spec.frameworks = "SomeFramework", "AnotherFramework"
     # spec.libraries = "iconv", "xml2"
 
@@ -52,7 +50,4 @@ Pod::Spec.new do |spec|
     ss.dependency 'ObjCCommandLine'
   end
 
-  spec.app_spec do |app|
-    app.source_files = 'MBoxCLI/*.{swift}'
-  end
 end

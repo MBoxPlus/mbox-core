@@ -9,7 +9,7 @@
 import Foundation
 extension Bundle {
     public static var app: Bundle? {
-        var path = main.bundlePath
+        var path = ProcessInfo.processInfo.arguments[0].destinationOfSymlink ?? main.bundlePath
         while true {
             if path.pathExtension.lowercased() == "app" {
                 return Bundle(path: path)

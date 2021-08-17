@@ -37,11 +37,11 @@ extension MBPluginPackage {
             if !bundle.isLoaded {
                 do {
                     if ProcessInfo.processInfo.environment["DYLD_PRINT_LIBRARIES"] == "1" {
-                        UI.log(info: "Load Plugin: \(self.package!.path!)")
+                        UI.log(info: "Load Plugin: \(self.package!.path!)", pip: .ERR)
                     }
                     try bundle.loadAndReturnError()
                 } catch {
-                    print("error: \(error)")
+                    UI.log(info: "Load Plugin `\(self.package!.name)` Error: \(error)", pip: .ERR)
                     return false
                 }
             }

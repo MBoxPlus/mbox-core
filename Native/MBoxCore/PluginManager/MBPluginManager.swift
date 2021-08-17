@@ -332,7 +332,7 @@ public final class MBPluginManager: NSObject {
                          function: StaticString = #function,
                          line: UInt = #line) {
         if ProcessInfo.processInfo.environment["DYLD_PRINT_LIBRARIES"] == "1" {
-            UI.log(info: msg, items: items, file: file, function: function, line: line)
+            UI.log(info: msg, items: items, pip: .ERR, file: file, function: function, line: line)
         }
     }
 }
