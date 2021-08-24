@@ -136,6 +136,7 @@ public final class MBPluginManager: NSObject {
                 var devPlugins = MBPluginPackage.search(directory: devRoot)
                 if let coreDev = devPlugins.removeValue(forKey: "MBoxCore") {
                     coreDev.nativeBundleDir = self.bundle.bundlePath.deletingLastPathComponent
+                    coreDev.isUnderDevelopment = true
                     plugins[coreDev.name] = coreDev
                 }
                 for (_, v) in devPlugins {

@@ -304,7 +304,6 @@
 		AB74D850229E60EF0013751C /* MBFileProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBFileProtocol.swift; sourceTree = "<group>"; };
 		AB74D851229E60EF0013751C /* MBYAMLProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBYAMLProtocol.swift; sourceTree = "<group>"; };
 		AB74D852229E60EF0013751C /* MBJSONProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBJSONProtocol.swift; sourceTree = "<group>"; };
-		AB85FCB722FD839C00F6EBEE /* repackage-dylibs.rb */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = text.script.ruby; path = "repackage-dylibs.rb"; sourceTree = "<group>"; tabWidth = 2; };
 		AB8E69EC24C981E000EE6767 /* MBPluginLaunchItemHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBPluginLaunchItemHistory.swift; sourceTree = "<group>"; };
 		AB9B4A6523C218E3001095BA /* NSString+charValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSString+charValue.swift"; sourceTree = "<group>"; };
 		ABA6D5A623A8D04D000BEE16 /* Dictionary+KeyPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dictionary+KeyPath.swift"; sourceTree = "<group>"; };
@@ -401,7 +400,6 @@
 			children = (
 				AB063F66238521D5000EB0DD /* manifest.yml */,
 				AB063F63238420E0000EB0DD /* Basic.xcconfig */,
-				AB85FCB722FD839C00F6EBEE /* repackage-dylibs.rb */,
 				AB282810229D46ED003084EF /* MBoxCore */,
 				AB6293B523000EC400F95DB8 /* MBoxCLI */,
 				AB24BB53268F3F4C008A73BB /* MDevCLI */,

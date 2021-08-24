@@ -1,4 +1,4 @@
-require 'test-utils/mbox-tests'
+require 'mbox-dev/mbox-tests'
 
 class Config < MBoxTests
   def test_list_empty

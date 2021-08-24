@@ -12,4 +12,13 @@ public extension Array {
     func compact<Element>() -> [Element] {
         return self.compactMap { $0 as? Element }
     }
+
+    func firstMap<T>(where predicate: (Element) throws -> T?) rethrows -> T? {
+        for item in self {
+            if let v = try predicate(item) {
+                return v
+            }
+        }
+        return nil
+    }
 }

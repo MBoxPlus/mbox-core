@@ -149,6 +149,10 @@ open class MBCodableObject: NSObject, MBCodable {
             mirror = m.superclassMirror
         }
     }
+
+    open override func copy() -> Any {
+        return Self.init(dictionary: self.dictionary)
+    }
 }
 
 extension String: MBCodable {
