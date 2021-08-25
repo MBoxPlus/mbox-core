@@ -335,13 +335,6 @@ open class MBCommander: NSObject {
 
     @discardableResult
     open func open(url: URL, withApplication appName: String? = nil) -> Bool {
-        let info: String
-        if let app = appName, !app.isEmpty {
-            info = "\(app) open `\(url)`"
-        } else {
-            info = "Open `\(url)`"
-        }
-        UI.log(info: info)
         return ExternalApp(name: appName).open(url: url)
     }
 

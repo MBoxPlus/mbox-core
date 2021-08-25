@@ -84,7 +84,7 @@ open class ExternalApp {
                      line: UInt = #line,
                      block: () throws -> Bool) rethrows -> Bool {
         var message: String
-        if let name = self.name {
+        if let name = self.name, !name.isEmpty {
             message = "\(name) open"
         } else {
             message = "Open"
