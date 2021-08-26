@@ -93,7 +93,7 @@ open class MBCodableObject: NSObject, MBCodable {
 
     public static func load(fromObject object: Any) throws -> Self {
         guard let dictionary = object as? [String: Any] else {
-            throw NSError(domain: "Convert Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "类型不匹配 \(self): \(object)"])
+            throw NSError(domain: "Convert Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "Type mismatch \(self): \(object)"])
         }
         let item = self.init(dictionary: dictionary)
         return item
@@ -175,7 +175,7 @@ extension Date: MBCodable {
         if let date = object as? Date {
             return date
         }
-        throw NSError(domain: "Convert Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "类型不匹配 \(self): \(object)"])
+        throw NSError(domain: "Convert Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "Type mismatch \(self): \(object)"])
     }
 
     public func toCodableObject() -> Any? {
@@ -225,7 +225,7 @@ extension Dictionary: MBCodable {
                 return object as! Dictionary<Key, Value>
         }
         guard let dict = object as? [AnyHashable: Any] else {
-            throw NSError(domain: "Convert Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "类型不匹配 \(self): \(object)"])
+            throw NSError(domain: "Convert Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "Type mismatch \(self): \(object)"])
         }
         return try Dictionary(uniqueKeysWithValues: dict.map { key, value in
             try (k.load(fromObject: key), v.load(fromObject: value)) as! (Key, Value)

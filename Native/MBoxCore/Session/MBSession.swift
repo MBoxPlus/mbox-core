@@ -3,7 +3,7 @@
 //  MBoxCore
 //
 //  Created by Whirlwind on 2018/8/29.
-//  Copyright © 2018年 Bytedance. All rights reserved.
+//  Copyright © 2018 Bytedance. All rights reserved.
 //
 
 import Foundation
@@ -51,7 +51,6 @@ open class MBSession: NSObject {
     }
 
     public lazy var cachedPlugins: [String: [MBSetting.PluginDescriptor]] = {
-        // 为了防止 Swift dynamic replacement 第一次未生效，故意执行两遍
         _ = self.plugins
         return self.plugins
     }()

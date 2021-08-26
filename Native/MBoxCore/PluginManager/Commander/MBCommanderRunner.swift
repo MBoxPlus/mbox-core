@@ -201,7 +201,6 @@ public func executeCommand(parser: ArgumentParser) throws -> String {
     if let group = MBCommanderGroup.shared.command(for: parser) {
         cmdGroup = group
     } else {
-        // 使用 MBCommander 基类解析基础 Options/Flags
         _ = try cmdClass.init(argv: parser)
         throw ArgumentError.invalidCommand("Not found command `\(parser.rawArguments.dropFirst().first!)`")
     }

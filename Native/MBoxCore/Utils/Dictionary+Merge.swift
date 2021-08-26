@@ -2,7 +2,7 @@
 //  Dictionary+Merge.swift
 //  MBoxCore
 //
-//  Created by 詹迟晶 on 2019/12/18.
+//  Created by Whirlwind on 2019/12/18.
 //  Copyright © 2019 bytedance. All rights reserved.
 //
 

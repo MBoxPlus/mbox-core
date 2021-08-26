@@ -158,7 +158,7 @@ public class Codable<T: CodableType>: CodableProperty {
                 if let transform = self.setterTransform {
                     value = transform(value, instance)
                 }
-                // 判断是否为 nil 
+                // Check nil
                 let obj = value as Any
                 if case Optional<Any>.none = obj {
                     instance.dictionary.removeValue(forKey: key)

@@ -186,7 +186,7 @@ extension MBSession {
 
     open func log(warn: String,
                   items: [String]? = nil,
-                  summary: Bool = true, // 是否汇总在最后显示
+                  summary: Bool = true,
                   file: StaticString = #file,
                   function: StaticString = #function,
                   line: UInt = #line) {

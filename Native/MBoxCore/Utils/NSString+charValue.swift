@@ -2,7 +2,7 @@
 //  NSString+charValue.swift
 //  MBoxCore
 //
-//  Created by 詹迟晶 on 2020/1/5.
+//  Created by Whirlwind on 2020/1/5.
 //  Copyright © 2020 bytedance. All rights reserved.
 //
 

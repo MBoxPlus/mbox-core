@@ -2,7 +2,7 @@
 //  Config.swift
 //  MBoxCore
 //
-//  Created by 詹迟晶 on 2019/12/15.
+//  Created by Whirlwind on 2019/12/15.
 //  Copyright © 2019 bytedance. All rights reserved.
 //
 

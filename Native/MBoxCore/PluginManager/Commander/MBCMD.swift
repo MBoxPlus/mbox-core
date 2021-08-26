@@ -3,7 +3,7 @@
 //  MBoxCore
 //
 //  Created by Whirlwind on 2018/9/17.
-//  Copyright © 2018年 Bytedance. All rights reserved.
+//  Copyright © 2018 Bytedance. All rights reserved.
 //
 
 import Foundation
@@ -210,7 +210,7 @@ open class MBCMD: NSObject {
             UI.log(verbose: "Link `\(targetPath)` -> `\(shellPath)`")
             try FileManager.default.createSymbolicLink(atPath: targetPath, withDestinationPath: shellPath)
         }
-        // 移除 zcompdump 缓存
+        // Remove zcompdump cache
         for file in FileManager.default.homeDirectoryForCurrentUser.path.subFiles {
             if file.lastPathComponent.starts(with: ".zcompdump") {
                 UI.log(verbose: "remove `\(file)`") {

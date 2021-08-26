@@ -2,7 +2,7 @@
 //  MBPluginPackage.swift
 //  MBoxCore
 //
-//  Created by 詹迟晶 on 2020/3/12.
+//  Created by Whirlwind on 2020/3/12.
 //  Copyright © 2020 bytedance. All rights reserved.
 //
 

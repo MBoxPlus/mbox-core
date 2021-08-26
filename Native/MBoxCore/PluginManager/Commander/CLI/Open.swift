@@ -2,7 +2,7 @@
 //  Open.swift
 //  MBoxCore
 //
-//  Created by 詹迟晶 on 2019/10/25.
+//  Created by Whirlwind on 2019/10/25.
 //  Copyright © 2019 bytedance. All rights reserved.
 //
 

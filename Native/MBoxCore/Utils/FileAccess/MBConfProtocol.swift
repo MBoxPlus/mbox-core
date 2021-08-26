@@ -2,7 +2,7 @@
 //  MBConfProtocol.swift
 //  MBoxCore
 //
-//  Created by 詹迟晶 on 2021/6/24.
+//  Created by Whirlwind on 2021/6/24.
 //  Copyright © 2021 bytedance. All rights reserved.
 //
 

@@ -106,7 +106,7 @@ open class MBCommander: NSObject {
         return commands.map { $0.joined(separator: ":") }
     }
 
-    // MARK: - 内部方法
+    // MARK: - Private methods to override
     open var argv: ArgumentParser!
 
     public override convenience init() {
@@ -169,7 +169,7 @@ open class MBCommander: NSObject {
 
     open func shiftArguments(_ name: String) -> [String] {
         guard let argument = self.allArguments[name] as? Argument else {
-            assertionFailure("在 arguments 类方法中未声明有该参数: \(name)")
+            assertionFailure("The parameter is not declared in the class method `arguments`: \(name)")
             return []
         }
         do {
