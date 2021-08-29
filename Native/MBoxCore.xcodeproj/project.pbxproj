@@ -125,6 +125,7 @@
 		AB74D854229E60EF0013751C /* MBYAMLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D851229E60EF0013751C /* MBYAMLProtocol.swift */; };
 		AB74D855229E60EF0013751C /* MBJSONProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D852229E60EF0013751C /* MBJSONProtocol.swift */; };
 		AB8E69ED24C981E000EE6767 /* MBPluginLaunchItemHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8E69EC24C981E000EE6767 /* MBPluginLaunchItemHistory.swift */; };
+		AB980B4D26D91D8C00D9F9EA /* Doc.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB980B4C26D91D8C00D9F9EA /* Doc.swift */; };
 		AB9B4A6623C218E3001095BA /* NSString+charValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB9B4A6523C218E3001095BA /* NSString+charValue.swift */; };
 		ABA6D5A723A8D04D000BEE16 /* Dictionary+KeyPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA6D5A623A8D04D000BEE16 /* Dictionary+KeyPath.swift */; };
 		ABA6D5AB23AA0169000BEE16 /* Dictionary+Merge.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABA6D5AA23AA0169000BEE16 /* Dictionary+Merge.swift */; };
@@ -305,6 +306,7 @@
 		AB74D851229E60EF0013751C /* MBYAMLProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBYAMLProtocol.swift; sourceTree = "<group>"; };
 		AB74D852229E60EF0013751C /* MBJSONProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBJSONProtocol.swift; sourceTree = "<group>"; };
 		AB8E69EC24C981E000EE6767 /* MBPluginLaunchItemHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBPluginLaunchItemHistory.swift; sourceTree = "<group>"; };
+		AB980B4C26D91D8C00D9F9EA /* Doc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Doc.swift; sourceTree = "<group>"; };
 		AB9B4A6523C218E3001095BA /* NSString+charValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSString+charValue.swift"; sourceTree = "<group>"; };
 		ABA6D5A623A8D04D000BEE16 /* Dictionary+KeyPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dictionary+KeyPath.swift"; sourceTree = "<group>"; };
 		ABA6D5AA23AA0169000BEE16 /* Dictionary+Merge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dictionary+Merge.swift"; sourceTree = "<group>"; };
@@ -499,6 +501,7 @@
 				AB0AF71B233731350053EF90 /* Env.swift */,
 				AB2B6E822362C8A200B86184 /* Open.swift */,
 				ABC0AE5423A623E4004831A8 /* Config.swift */,
+				AB980B4C26D91D8C00D9F9EA /* Doc.swift */,
 			);
 			path = CLI;
 			sourceTree = "<group>";
@@ -1108,6 +1111,7 @@
 				AB2B6E832362C8A200B86184 /* Open.swift in Sources */,
 				AB74D6D6229D49B70013751C /* NSPointerArray+WeakObject.swift in Sources */,
 				AB71954D232006710079935A /* UserDefault.swift in Sources */,
+				AB980B4D26D91D8C00D9F9EA /* Doc.swift in Sources */,
 				AB292672239E7CB5005212E2 /* SignedIntegerExtensions.swift in Sources */,
 				ABD6612C230FB4B100F50309 /* Setup.swift in Sources */,
 				AB292686239E7CB5005212E2 /* CollectionExtensions.swift in Sources */,

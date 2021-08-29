@@ -33,6 +33,21 @@ extension MBCommander {
             return "Get/Set Default Configuration"
         }
 
+        open override class var example: String? {
+            return """
+# Get a value from gloal configuration
+$ mbox config key --global
+
+# Show all configs
+$ mbox config
+
+# Set a configuration in global configuration
+$ mbox config key value --global
+
+# Delete a configuation in global configuration
+$ mbox config key --delete
+"""
+        }
         dynamic
         open override class var flags: [Flag] {
             var flags = super.flags

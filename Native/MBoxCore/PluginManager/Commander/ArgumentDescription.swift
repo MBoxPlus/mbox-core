@@ -57,7 +57,7 @@ public class Argument: ArgumentDescriptor {
 }
 
 
-public class Option: ArgumentDescriptor {
+public class Option: ArgumentDescriptor, Equatable {
     public let name: String
     public let flag: Character?
     public let _description: String?
@@ -110,6 +110,10 @@ public class Option: ArgumentDescriptor {
         }
         desc << "--\(name)"
         return desc.joined(separator: " ")
+    }
+
+    public static func == (lhs: Option, rhs: Option) -> Bool {
+        return lhs.name == rhs.name
     }
 }
 

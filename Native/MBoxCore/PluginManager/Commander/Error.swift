@@ -265,6 +265,17 @@ class Help: CustomStringConvertible {
             output.append("")
         }
 
+        if var example = command.example {
+            example = example.replacingOccurrences(of: "(?m)^(#.*)$", with: "$1".ANSI(.cyan).ANSI(.italic), options: .regularExpression)
+            example = example.replacingOccurrences(of: "(?m)^\\$ (.*)$", with: "\\$ " + "$1".ANSI(.green), options: .regularExpression)
+            example = example.replacingOccurrences(of: "(?m)^", with: "    ", options: .regularExpression)
+            output.append("Example:".ANSI(.underline))
+            output.append("")
+            output.append(example)
+
+            output.append("")
+        }
+
         if let extendDescription = command.extendHelpDescription {
             output.append(extendDescription)
             output.append("")
@@ -316,7 +327,12 @@ class Help: CustomStringConvertible {
             for (index, column) in columns.enumerated() {
                 let max = justifications[index]
                 if max == 0 { continue }
-                justColumns << column.ljust(max + column.count - column.noANSI.count)
+                if index == columns.count - 1 {
+                    justColumns << column
+                    continue
+                } else {
+                    justColumns << column.ljust(max + column.count - column.noANSI.count)
+                }
                 if index == columns.count - 3 {
                     justColumns << (column.count == 0 ? "  " : ", ")
                 } else if index == columns.count - 2 {

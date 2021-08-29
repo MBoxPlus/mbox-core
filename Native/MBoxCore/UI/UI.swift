@@ -14,7 +14,7 @@ public var UI: MBSession { return MBSession.current! }
 
 extension MBSession {
 
-    internal func indentLog<T>(flag: DDLogFlag, block: () throws -> T) rethrows -> T {
+    open func indentLog<T>(flag: DDLogFlag, block: () throws -> T) rethrows -> T {
         self.indents.append(flag)
         defer {
             if !self.indents.isEmpty {

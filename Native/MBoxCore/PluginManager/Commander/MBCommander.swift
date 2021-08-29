@@ -51,6 +51,10 @@ open class MBCommander: NSObject {
         return nil
     }
 
+    open class var example: String? {
+        return nil
+    }
+
     dynamic
     open class var options: [Option] {
         return [

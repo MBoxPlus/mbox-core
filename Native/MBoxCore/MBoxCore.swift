@@ -32,6 +32,7 @@ open class MBoxCore: NSObject, MBPluginProtocol {
         MBCommanderGroup.shared.addCommand(MBCommander.Plugin.Disable.self)
         MBCommanderGroup.shared.addCommand(MBCommander.Open.self)
         MBCommanderGroup.shared.addCommand(MBCommander.Config.self)
+        MBCommanderGroup.shared.addCommand(MBCommander.Doc.self)
     }
 
     dynamic
