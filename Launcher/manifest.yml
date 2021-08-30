@@ -8,6 +8,3 @@ rsync:
     - MBoxCore/Homebrew
 XcodeCLT:
   required: true
-
-MBoxCLI:
-  required: true

@@ -40,14 +40,14 @@ public func !~(string:String, regex:String) -> Bool {
 
 public struct MBGitURL: Equatable, CustomStringConvertible {
     public init?(_ git: __shared String) {
-        guard let matchData = try? git.match("^((.*):\\/\\/)?((.*)@)?(.*?)[:|\\/](.*?)\\/(.*?)(.git)?$")?.first else {
+        guard let matchData = try? git.match("^((.*):\\/\\/)?((.*)@)?(.*?)[:|\\/](.*)\\/(.*?)(.git)?$")?.first else {
             return nil
         }
         url = git
         scheme = matchData[2]
         user = matchData[4]
         host = matchData[5]
-        group = matchData[6]
+        groups = matchData[6].split(separator: "/").map { String($0) }
         project = matchData[7]
 
         if user.isEmpty {
@@ -59,8 +59,12 @@ public struct MBGitURL: Equatable, CustomStringConvertible {
     public private(set) var scheme: String
     public private(set) var host: String
     public private(set) var user: String
-    public private(set) var group: String
+    public private(set) var groups: [String]
     public private(set) var project: String
+
+    public var group: String {
+        return groups.joined(separator: "/")
+    }
 
     public var path: String {
         return "\(group)/\(project)"

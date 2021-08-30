@@ -145,7 +145,7 @@ $ \((command + args).joined(separator: " "))
             if arguments.isEmpty {
                 return
             }
-            output(title: "Arguments:") {
+            output(strong: "Arguments:") {
                 self.output(table: arguments.map { desc(for: $0) })
             }
         }
@@ -154,7 +154,7 @@ $ \((command + args).joined(separator: " "))
             if options.isEmpty {
                 return
             }
-            output(title: "Options:") {
+            output(strong: "Options:") {
                 self.output(table: options.sorted(by: \.name).map { desc(for: $0) })
             }
         }
@@ -163,13 +163,13 @@ $ \((command + args).joined(separator: " "))
             if flags.isEmpty {
                 return
             }
-            output(title: "Flags:") {
+            output(strong: "Flags:") {
                 self.output(table: flags.sorted(by: \.name).map { desc(for: $0) })
             }
         }
 
         func output(example: String) {
-            output(title: "Example:") {
+            output(strong: "Example:") {
                 output(block: example, language: "bash")
             }
         }
@@ -298,6 +298,15 @@ $ \((command + args).joined(separator: " "))
 
         func output(text: String) {
             output(string: text)
+        }
+
+        func output(strong: String, block: ()->()) {
+            if self.markdown {
+                output(string: "\n<u>" + strong + "</u>\n")
+            } else {
+                output(string: strong.ANSI(.underline))
+            }
+            UI.indentLog(flag: .info, block: block)
         }
 
         func output(table: [[String]]) {

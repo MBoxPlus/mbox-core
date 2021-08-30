@@ -102,9 +102,11 @@ public final class MBPluginManager: NSObject {
         } else {
 
             var appPluginPaths = [String]()
-            if let appPluginPath = MBoxApp.path?.appending(pathComponent: "Contents/Resources/Plugins") {
-                appPluginPaths.append(appPluginPath)
+            if let path = ProcessInfo.processInfo.arguments[0].destinationOfSymlink?.appending(pathComponent: "../..").cleanPath,
+               !appPluginPaths.contains(path) {
+                appPluginPaths.append(path)
             }
+
             let appPluginPath = Self.bundle.bundlePath.appending(pathComponent: "../..").cleanPath
             if !appPluginPaths.contains(appPluginPath) {
                 appPluginPaths.append(appPluginPath)

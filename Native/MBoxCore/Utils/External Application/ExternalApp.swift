@@ -101,5 +101,3 @@ open class ExternalApp {
         return try block()
     }
 }
-
-let MBoxApp = ExternalApp(name: "mbox")
