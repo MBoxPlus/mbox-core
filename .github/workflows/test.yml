@@ -1,0 +1,44 @@
+name: Test
+
+on:
+  push:
+    branches:
+       - 'main'
+       - 'develop'
+       - 'push_ci_test/**'
+  pull_request:
+    branches:
+      - 'main'
+      - 'develop'
+jobs:
+  test:
+    runs-on: macos-11
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Git Config
+        run: |
+          git config --global user.email "mbox.runner@mbox.com"
+          git config --global user.name "MBox Runner"
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.6
+
+      - name: "Select Xcode 12.5.1"
+        uses: devbotsxyz/xcode-select@v1
+        with:
+          version: "12.5.1"
+
+      - uses: mboxplus/mbox-build-plugin-action@main
+        id: build-plugin
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: MBox ENV
+        run: |
+          mdev env --root='${{ steps.build-plugin.outputs.build-path }}/..'
+
+      - name: Test
+        run: |
+          mdev plugin test --root='${{ steps.build-plugin.outputs.build-path }}/..' --verbose
