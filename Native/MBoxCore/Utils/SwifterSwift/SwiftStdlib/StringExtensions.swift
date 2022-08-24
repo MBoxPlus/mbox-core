@@ -908,16 +908,6 @@ public extension String {
     }
     #endif
 
-    #if canImport(Foundation)
-    /// SwifterSwift: Verify if string matches the regex pattern.
-    ///
-    /// - Parameter pattern: Pattern to verify.
-    /// - Returns: true if string matches the pattern.
-    func matches(pattern: String) -> Bool {
-        return range(of: pattern, options: .regularExpression, range: nil, locale: nil) != nil
-    }
-    #endif
-
     /// SwifterSwift: Pad string to fit the length parameter size with another string in the start.
     ///
     ///   "hue".padStart(10) -> "       hue"

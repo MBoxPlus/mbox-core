@@ -31,7 +31,7 @@ extension MBCommander {
             self.zsh = self.shiftFlag("zsh")
             self.binDir = self.shiftOption("bin-dir")
             try super.setup()
-            UI.requireSetupLauncher = false
+            MBProcess.shared.requireSetupLauncher = false
         }
 
         open var zsh: Bool = false

@@ -67,10 +67,10 @@ $ mbox config key --delete
         open override class var extendHelpDescription: String? {
             var output = [String]()
             output.append("Settings:".ANSI(.underline))
-            MBPluginManager.shared.packages.forEach { (package) in
-                if let schema = package.settingSchema {
+            MBPluginManager.shared.modules.forEach { (module) in
+                if let schema = module.settingSchema {
                     output.append("")
-                    let settingID = schema.id ?? package.name
+                    let settingID = schema.id ?? module.name
                     output.append("    [\(settingID.ANSI(.underline))]")
                     schema.properties?.forEach { (key, value) in
                         output.append("")
@@ -145,8 +145,8 @@ $ mbox config key --delete
 
         open func schema(for name: String) -> MBPluginSettingSchema? {
             if self.scope.isEqual("rc") {
-                for plugin in MBPluginManager.shared.packages {
-                    for (key, value) in plugin.settingSchema?.properties ?? [:] {
+                for module in MBPluginManager.shared.modules {
+                    for (key, value) in module.settingSchema?.properties ?? [:] {
                         if key.lowercased() == name.lowercased() {
                             return value
                         }
@@ -155,7 +155,7 @@ $ mbox config key --delete
                 return nil
             }
             let paths = name.components(separatedBy: ".")
-            guard let firstName = paths.first, let plugin = MBPluginManager.shared.packages.first(where: { $0.settingSchema?.id == firstName }) else {
+            guard let firstName = paths.first, let plugin = MBPluginManager.shared.modules.first(where: { $0.settingSchema?.id == firstName }) else {
                 return nil
             }
             let settingSchema = plugin.settingSchema!
@@ -199,8 +199,9 @@ $ mbox config key --delete
                 return
             }
             var string: String
-            if let v = value as? Dictionary<String, Any> {
-                string = try v.toString(coder: .json, sortedKeys: true, prettyPrinted: true)
+            if let v = value as? JSONSerializable,
+               let s = v.toJSONString(pretty: true) {
+                string = s
             } else {
                 if let boolValue = (value as? NSNumber)?.boolValue, settingSchema.type == MBPluginSettingSchema.MBPluginSettingSchemaTypeName.boolean {
                     string = "\(boolValue)"

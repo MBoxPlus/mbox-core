@@ -1,4 +1,4 @@
-
+MBox:
 Homebrew:
   icon: homebrew.png
   dependencies:
@@ -7,4 +7,3 @@ rsync:
   dependencies:
     - MBoxCore/Homebrew
 XcodeCLT:
-  required: true

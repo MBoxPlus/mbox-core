@@ -129,11 +129,11 @@ open class MBCommander: NSObject {
 
     dynamic
     open func setup() throws {
-        if UI.requireSetupLauncher {
+        if MBProcess.shared.requireSetupLauncher {
             if type(of: self) == MBCommander.self {
-                UI.requireSetupLauncher = false
+                MBProcess.shared.requireSetupLauncher = false
             } else {
-                UI.requireSetupLauncher = self.shiftFlag("launcher", default: true)
+                MBProcess.shared.requireSetupLauncher = self.shiftFlag("launcher", default: true)
             }
         }
     }
@@ -141,11 +141,8 @@ open class MBCommander: NSObject {
     dynamic
     open func setup(argv: ArgumentParser) throws {
         self.argv = argv
-        if self.hasOption("api") {
-            UI.apiFormatter = self.shiftOption("api", default: MBLoggerAPIFormatter.json)
-        }
         if self.shiftFlag("help") {
-            UI.showHelp = true
+            MBProcess.shared.showHelp = true
             try help()
         }
         try setup()
@@ -262,13 +259,16 @@ open class MBCommander: NSObject {
         return `default`
     }
 
-    dynamic
-    open func performAction() throws {
+    func performAction() throws {
         try autoreleasepool {
-            try UI.with(pip: .ERR) {
+            try UI.logger.with(pip: .ERR) {
                 try setupLauncher()
             }
             try validate()
+            try? self.preRun()
+            defer {
+                try? self.postRun()
+            }
             try performRun()
         }
     }
@@ -276,6 +276,20 @@ open class MBCommander: NSObject {
     dynamic
     open func performRun() throws {
         try run()
+    }
+
+    dynamic
+    open func preRun() throws {
+        for hook in UI.preRunHooks {
+            hook()
+        }
+    }
+
+    dynamic
+    open func postRun() throws {
+        for hook in UI.postRunHooks {
+            hook()
+        }
     }
 
     dynamic
@@ -299,33 +313,29 @@ open class MBCommander: NSObject {
         }
     }
 
-    open lazy var launcherPlugins = Array(MBPluginManager.shared.packages)
-
     dynamic
     open func setupLauncher(force: Bool = false) throws {
-        if force || UI.requireSetupLauncher {
-            try UI.with(pip: .ERR) {
-                try setupLauncher(plugins: self.launcherPlugins)
+        if force || MBProcess.shared.requireSetupLauncher {
+            let items = MBPluginManager.shared.requireInstallLaunchers(for: Array(MBPluginManager.shared.modules))
+            if items.isEmpty { return }
+            try UI.logger.with(pip: .ERR) {
+                try setupLauncher(items: items)
             }
         }
     }
 
-    open func setupLauncher(plugins: [MBPluginPackage]) throws {
-        let plugins = MBPluginManager.shared.requireInstallLauncher(for: plugins)
-        if !plugins.isEmpty {
-            try UI.section("Setup Environment") {
-                try self.invoke(Plugin.Launch.self, argv: ArgumentParser(arguments: plugins.map { $0.name }))
-            }
+    open func setupLauncher(items: [MBPluginLaunchItem]) throws {
+        try UI.section("Setup Environment") {
+            try self.invoke(Plugin.Launch.self, argv: ArgumentParser(arguments: items.map { $0.fullName }))
         }
     }
-
 
     open var allowRemainderArgs: Bool {
         return false
     }
 
     open func help(_ desc: String? = nil) throws {
-        throw ArgumentError.invalidCommand(desc)
+        throw ArgumentError.help(desc)
     }
     
     open func hookfile(_ desc: String? = nil) throws {
@@ -334,7 +344,7 @@ open class MBCommander: NSObject {
 
     open func invoke(_ cmd: MBCommander.Type, argv: ArgumentParser? = nil) throws {
         let other = try cmd.init(argv: argv ?? self.argv, command: self)
-        try other.performAction()
+        try other.performRun()
     }
 
     @discardableResult
@@ -347,7 +357,7 @@ open class MBCommander: NSObject {
     open class var preScriptFileName: String {
         return "pre_\(fullName.replacingOccurrences(of: ".", with: "_"))"
     }
-    
+
     dynamic
     open class var postScriptFileName: String {
         return "post_\(fullName.replacingOccurrences(of: ".", with: "_"))"

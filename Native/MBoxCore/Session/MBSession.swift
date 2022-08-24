@@ -7,18 +7,14 @@
 //
 
 import Foundation
-import CocoaLumberjack
 
 open class MBSession: NSObject {
 
-    public convenience init(title: String?, isMain: Bool = false) {
-        self.init(isMain: isMain)
+    public init(title: String?, isMain: Bool = false) {
         self.title = title
-    }
-
-    public init(isMain: Bool = false) {
         self.isMainSession = isMain
         super.init()
+        self.logger.setLogFile(with: MBSetting.globalDir.appending(pathComponent: "logs"))
     }
 
     public lazy var rootPath: String = FileManager.pwd
@@ -26,7 +22,7 @@ open class MBSession: NSObject {
     // MARK: - Plugins
     dynamic
     open var plugins: [String: [MBSetting.PluginDescriptor]] {
-        var value = ["MBoxCore": [MBSetting.PluginDescriptor(requiredBy: "Application")]]
+        var value = [String: [MBSetting.PluginDescriptor]]()
         MBSetting.global.plugins?.forEach { (name, desc) in
             var v = value[name] ?? []
             v.append(desc)
@@ -38,14 +34,11 @@ open class MBSession: NSObject {
     dynamic
     open var recommendedPlugins: [String: [MBSetting.PluginDescriptor]] {
         var result: [String: [MBSetting.PluginDescriptor]] = [:]
-        self.cachedPlugins.forEach() { plugin, value in
-            let package = MBPluginManager.shared.allPackages.first { (key, pluginPackage) -> Bool in
-                return plugin.lowercased() == pluginPackage.name.lowercased()
+        for (plugin, desc) in self.cachedPlugins {
+            guard MBPluginManager.shared.package(for: plugin) == nil else {
+                continue
             }
-            guard package == nil else {
-                return
-            }
-            result[plugin] = value
+            result[plugin] = desc
         }
         return result
     }
@@ -91,11 +84,9 @@ open class MBSession: NSObject {
         return title
     }
 
-    public var indents: [DDLogFlag] = []
+    public var indents: [MBLogFlag] = []
 
-    public static var main = MBSession()
-
-    public static var current: MBSession? = main
+    public static var current: MBSession?
 
     open var runningCMDs: [MBCMD] = []
     public var isCancel: Bool = false
@@ -111,7 +102,7 @@ open class MBSession: NSObject {
 
     public var duration: TimeInterval = 0
 
-    public var fromGUI: Bool = ProcessInfo.processInfo.environment["MBOX_GUI"] != nil
+    public var fromGUI: Bool = ProcessInfo.processInfo.removeEnvironment(name: "MBOX_GUI") != nil
 
     // MARK: logger
     open var verbose: Bool = false {
@@ -131,19 +122,6 @@ open class MBSession: NSObject {
         return try block()
     }
 
-    open var defaultPipe = MBLoggerPipe.OUT
-
-    @discardableResult
-    public func with<T>(pip: MBLoggerPipe, block: () throws -> T) rethrows -> T {
-        if self.defaultPipe == pip {
-            return try block()
-        }
-        let v = self.defaultPipe
-        defer { self.defaultPipe = v }
-        self.defaultPipe = pip
-        return try block()
-    }
-
     open var args: ArgumentParser!
     open var devRoot: String?
     open var showHelp: Bool = false
@@ -153,34 +131,10 @@ open class MBSession: NSObject {
         }
     }
 
-    open lazy var logger: MBLogger = MBLogger(title: self.title)
-    open var verbLogFilePath: String? {
-        set {
-            logger.verbFilePath = newValue
-        }
-        get {
-            return logger.verbLogFileInfo?.filePath
-        }
-    }
-    open var infoLogFilePath: String? {
-        set {
-            logger.infoFilePath = newValue
-        }
-        get {
-            return logger.infoLogFileInfo?.filePath
-        }
-    }
-    public var logDirectory: String? {
-        set {
-            logger.logDirectory = newValue
-        }
-        get {
-            return logger.logDirectory
-        }
-    }
+    open lazy var logger: MBLog = MBLog(title: self.title)
 
     public struct LogInfo {
-        public var flag: DDLogFlag
+        public var flag: MBLogFlag
         public var message: String
         public var items: [String]?
         public var file: StaticString

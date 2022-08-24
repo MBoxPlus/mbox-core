@@ -12,331 +12,235 @@ public var RunUnderCommandLineMode: Bool = false
 
 public protocol MBPluginProtocol {
     func registerCommanders()
+}
 
+public protocol MBPluginMigrateProtocol {
     func installPlugin(from version: String?) throws
     func uninstallPlugin()
 }
 
-extension MBPluginProtocol {
-    public func registerCommanders() {}
+var kMBThreadShouldOutputPluginLog: UInt8 = 0
+extension MBThread {
+    private var shouldOutputLog: Bool {
+        return associatedObject(base: self, key: &kMBThreadShouldOutputPluginLog) {
+            return ProcessInfo.processInfo.removeEnvironment(name: "MBOX_PRINT_PLUGIN") == "1"
+        }
+    }
 
-    public func installPlugin(from version: String?) throws {}
-    public func uninstallPlugin() {}
+    @inline(__always)
+    func logLoad(_ msg: String,
+                 items: (() -> [String])? = nil,
+                 file: StaticString = #file,
+                 function: StaticString = #function,
+                 line: UInt = #line) {
+        if self.shouldOutputLog {
+            UI.log(info: msg, items: items?(), pip: .ERR, file: file, function: function, line: line)
+        }
+    }
+
+    @discardableResult @inline(__always)
+    func logLoad<T>(_ msg: String,
+                    file: StaticString = #file,
+                    function: StaticString = #function,
+                    line: UInt = #line,
+                    block: () throws -> T) rethrows -> T {
+        if self.shouldOutputLog {
+            return try UI.log(info: msg, pip: .ERR, file: file, function: function, line: line, block: block)
+        } else {
+            return try block()
+        }
+    }
 }
-
 public final class MBPluginManager: NSObject {
 
     public static let shared = MBPluginManager()
-    public lazy var allPackages: [String: MBPluginPackage] = all()
 
-    public private(set) var packages = Set<MBPluginPackage>()
-
-    public func package(for name: String) -> MBPluginPackage? {
-        let packages = Array(self.allPackages.values)
-        return packages.first { $0.isPlugin(name) }
+    // MARK: - All Plugins
+    public lazy var allPackages: [MBPluginPackage] = all() {
+        didSet {
+            self.allPackagesHash = self.generateAllPackagesHash()
+            self.allModules = self.generateAllModules()
+        }
     }
 
-    public func dependencies(for plugin: String) -> [MBPluginPackage] {
-        var packages = [MBPluginPackage]()
-        if let package = self.package(for: plugin) {
-            if let dependencies = package.dependencies {
-                for dp in dependencies {
-                    for package in self.dependencies(for: dp) {
-                        if !packages.contains(package) {
-                            packages.append(package)
-                        }
-                    }
+    private lazy var allPackagesHash: [String: MBPluginPackage] = self.generateAllPackagesHash()
+
+    private func generateAllPackagesHash() -> [String: MBPluginPackage] {
+        return Dictionary(self.allPackages.map { ($0.name.lowercased(), $0) })
+    }
+
+    public func package(for name: String) -> MBPluginPackage? {
+        var name = name.lowercased()
+        if !name.hasPrefix("mbox") {
+            name = "mbox" + name
+        }
+        return allPackagesHash[name]
+    }
+
+    public private(set) lazy var allModules: [MBPluginModule] = self.generateAllModules() {
+        didSet {
+            self.allModulesHash = self.generateAllModulesHash()
+        }
+    }
+
+    private lazy var allModulesHash: [String: MBPluginModule] = self.generateAllModulesHash()
+
+    private func generateAllModules() -> [MBPluginModule] {
+        return self.allPackages.flatMap { $0.allModules }
+    }
+
+    private func generateAllModulesHash() -> [String: MBPluginModule] {
+        return Dictionary(self.allModules.map { ($0.name.lowercased(), $0) })
+    }
+
+    public func module(for name: String) -> MBPluginModule? {
+        return self.allModulesHash[name.lowercased()]
+    }
+
+    private func dependencies(for name: String, result: inout [String]) {
+        guard let module = self.module(for: name) else { return }
+        for dp in module.dependencies.map(\.moduleName) {
+            if result.contains(dp) {
+                continue
+            }
+            result.append(dp)
+            self.dependencies(for: dp, result: &result)
+        }
+    }
+
+    public func dependencies(for name: String) -> [MBPluginModule] {
+        var result = [String]()
+        self.dependencies(for: name, result: &result)
+        return result.compactMap { self.module(for: $0) }
+    }
+
+    // MARK: - Activated Plugin Modules
+    public internal(set) var modules = Set<MBPluginModule>() {
+        didSet {
+            self.modulesHash = Dictionary(grouping: self.modules) { $0.package }
+            self.packages = Array(modulesHash.keys)
+        }
+    }
+    public private(set) var modulesHash = [MBPluginPackage: [MBPluginModule]]()
+    public private(set) var packages: [MBPluginPackage] = []
+
+    // MARK: - Search Plugins
+    private func setNativeBundle(_ package: MBPluginPackage, in directory: String) {
+        for module in package.allModules {
+            if module.CLI == true, module.bundlePath == nil {
+                let framework = directory.appending(pathComponent: module.relativeDir).appending(pathComponent: module.bundleName).cleanPath
+                if framework.isDirectory {
+                    UI.logLoad("[\(module.name)] Redirect Framework => \(framework)")
+                    module.bundlePath = framework
                 }
             }
-            packages.append(package)
         }
+    }
+
+    private func search(directory: String) -> [MBPluginPackage] {
+        return UI.logLoad("- \(directory)") {
+            return MBPluginPackage.search(directory: directory).values.sorted(by: \.name)
+        }
+    }
+
+    private func addPacakge(_ package: MBPluginPackage, plugins: inout [String: [MBPluginPackage]]) {
+        let name = package.name.lowercased()
+        var v = plugins[name] ?? []
+        v.insert(package, at: 0)
+        plugins[name] = v
+    }
+
+    private func addPacakge(directory: String, plugins: inout [String: [MBPluginPackage]], block: (MBPluginPackage) -> Void) {
+        search(directory: directory).forEach { package in
+            block(package)
+            self.addPacakge(package, plugins: &plugins)
+        }
+    }
+
+    public func all() -> [MBPluginPackage] {
+        let packages = UI.logLoad("Search Plugins:") { _all() }
+
+        UI.logLoad("Found Plugins:", items: {
+            return packages.sorted(by: \.name).map {
+                "\($0.description)\n\($0.allModules.map { "  " + $0.moduleDescription }.joined(separator: "\n"))"
+            }
+        })
+
         return packages
     }
 
-    public func dependencies(for plugins: [String]) -> [MBPluginPackage] {
-        var values = [MBPluginPackage]()
-        for plugin in plugins {
-            for package in self.dependencies(for: plugin) {
-                if !values.contains(package) {
-                    values.append(package)
-                }
-            }
-        }
-        return values
-    }
+    private func _all() -> [MBPluginPackage] {
+        var plugins: [String: [MBPluginPackage]] = [:]
 
-    public func all() -> [String: MBPluginPackage] {
-        var plugins: [String: MBPluginPackage] = [:]
-
-        logLoad("Search Plugins:")
-
-        if let pluginPaths = try? UI.args.option(for: "plugin-paths", shift: true)?.split(separator: ":") {
+        // Environment Plugin
+        if let pluginPaths = try? MBProcess.shared.args.option(for: "plugin-paths", shift: true)?.split(separator: ":") {
             for path in pluginPaths {
-                if let package = MBPluginPackage.from(directory: String(path)) {
-                    plugins[package.name] = package
+                guard let package = MBPluginPackage.from(directory: String(path)) else {
+                    continue
                 }
+                package.isInApplication = true
+                self.addPacakge(package, plugins: &plugins)
             }
 
-            if let devRoot = UI.devRoot {
-                logLoad("  \(devRoot)")
-                let devPlugins = MBPluginPackage.search(directory: devRoot)
-                for (name, v) in devPlugins {
-                    guard plugins.has(key: name) else { continue }
-                    v.isUnderDevelopment = true
-                    if v.CLI == true,
-                       v.nativeBundleDir == nil {
-                        let framework = devRoot.appending(pathComponent: "build/\(v.name)/\(v.name).framework")
-                        if framework.isDirectory {
-                            v.nativeBundleDir = framework.deletingLastPathComponent
-                        }
+            // Development Plugin
+            if let devRoot = MBProcess.shared.devRoot {
+                search(directory: devRoot).forEach { p in
+                    if let package = plugins[p.name.lowercased()]?.first {
+                        setNativeBundle(package, in: devRoot.appending(pathComponent: "build").appending(pathComponent: package.name))
                     }
-                    if v.CLI == true,
-                       v.nativeBundleDir == nil,
-                       let releasePlugin = plugins[v.name] {
-                        v.nativeBundleDir = releasePlugin.nativeBundleDir
-                    }
-                    plugins[v.name] = v
                 }
             }
-
         } else {
+            // User Plugin
+            let homePluginPath = MBSetting.globalDir.appending(pathComponent: "plugins")
 
-            var appPluginPaths = [String]()
-            if let path = ProcessInfo.processInfo.arguments[0].destinationOfSymlink?.appending(pathComponent: "../..").cleanPath,
-               !appPluginPaths.contains(path) {
-                appPluginPaths.append(path)
+            self.addPacakge(directory: homePluginPath, plugins: &plugins) {
+                $0.isInUserDirectory = true
+            }
+
+            // System Plugin
+            let cmdPath = ProcessInfo.processInfo.arguments[0]
+            let path = (cmdPath.destinationOfSymlink ?? cmdPath).appending(pathComponent: "../..").cleanPath
+            var appPluginPaths = [path]
+
+            if MBProcess.shared.devRoot != nil {
+                let path2 = (cmdPath.destinationOfSymlink ?? cmdPath).appending(pathComponent: "../../..").cleanPath
+                if !appPluginPaths.contains(path2) {
+                    appPluginPaths.append(path2)
+                }
             }
 
             let appPluginPath = Self.bundle.bundlePath.appending(pathComponent: "../..").cleanPath
             if !appPluginPaths.contains(appPluginPath) {
                 appPluginPaths.append(appPluginPath)
             }
+
             for path in appPluginPaths {
-                logLoad("  \(path)")
-                plugins.merge(MBPluginPackage.search(directory: path)) { (a, b) in
-                    return b
+                self.addPacakge(directory: path, plugins: &plugins) {
+                    $0.isInApplication = true
                 }
             }
 
-            plugins.forEach { (_, v) in
-                v.isInApplication = true
-            }
-
-            let homePluginPath = MBSetting.globalDir.appending(pathComponent: "plugins")
-            logLoad("  \(homePluginPath)")
-            let globalPlugins = MBPluginPackage.search(directory: homePluginPath)
-            globalPlugins.forEach { (_, v) in
-                v.isInUserDirectory = true
-            }
-
-            plugins.merge(globalPlugins) { (a, b) -> MBPluginPackage in
-                return a.version.compare(b.version, options: .numeric) == .orderedDescending ? a : b
-            }
-
-            if let devRoot = UI.devRoot {
-                logLoad("  \(devRoot)")
-                var devPlugins = MBPluginPackage.search(directory: devRoot)
-                if let coreDev = devPlugins.removeValue(forKey: "MBoxCore") {
-                    coreDev.nativeBundleDir = self.bundle.bundlePath.deletingLastPathComponent
-                    coreDev.isUnderDevelopment = true
-                    plugins[coreDev.name] = coreDev
-                }
-                for (_, v) in devPlugins {
-                    v.isUnderDevelopment = true
-                    if v.CLI == true,
-                       v.nativeBundleDir == nil {
-                        let framework = devRoot.appending(pathComponent: "build/\(v.name)/\(v.name).framework")
-                        if framework.isDirectory {
-                            v.nativeBundleDir = framework.deletingLastPathComponent
-                        }
-                    }
-                    if v.CLI == true,
-                       v.nativeBundleDir == nil,
-                       let releasePlugin = plugins[v.name] {
-                        v.nativeBundleDir = releasePlugin.nativeBundleDir
-                    }
-                    plugins[v.name] = v
+            // Development Plugin
+            if let devRoot = MBProcess.shared.devRoot {
+                self.addPacakge(directory: devRoot, plugins: &plugins) {
+                    $0.isUnderDevelopment = true
+                    setNativeBundle($0, in: devRoot.appending(pathComponent: "build").appending(pathComponent: $0.name))
                 }
             }
         }
 
-        logLoad("Found Plugins:", items: plugins.map(\.value).sorted(by: \.name).map { "\($0.name) (\($0.path!))" })
-
-        return plugins
-    }
-
-    public func pluginBundle(for bundleName: String) -> MBPluginPackage.PluginBundle? {
-        var names = bundleName.split(separator: "/").map { String($0) }
-        let name = names.removeFirst()
-        guard let package = self.package(for: name) else { return nil }
-        return package.pluginBundle(for: names.first)
-    }
-
-    @discardableResult
-    public func load(pluginPackage: MBPluginPackage) -> Bool {
-        guard let bundle = pluginPackage.defaultBundle else { return true }
-        var loadedBundles = Set<MBPluginPackage.PluginBundle>()
-        var failedBundles = Set<MBPluginPackage.PluginBundle>()
-        return self.load(pluginBundle: bundle, loadedBundles: &loadedBundles, failedBundles: &failedBundles)
-    }
-
-    @discardableResult
-    public func load(pluginBundle: MBPluginPackage.PluginBundle,
-                     loadedBundles: inout Set<MBPluginPackage.PluginBundle>,
-                     failedBundles: inout Set<MBPluginPackage.PluginBundle>) -> Bool {
-        if loadedBundles.contains(pluginBundle) {
-            return true
+        var resultPlugins = [String: MBPluginPackage]()
+        plugins.forEach { (_, packages: [MBPluginPackage]) in
+            let package = packages.first!
+            package.merge(packages)
+            resultPlugins[package.name] = package
         }
-        pluginBundle.dependencies?.forEach({ name in
-            guard let bundle = self.pluginBundle(for: name) else { return }
-            load(pluginBundle: bundle,
-                 loadedBundles: &loadedBundles,
-                 failedBundles: &failedBundles)
-        })
-        let package = pluginBundle.package!
-        if package.CLI != true || pluginBundle.load() {
-            if pluginBundle.name == "" {
-                self.packages.insert(package)
-            }
-            loadedBundles.insert(pluginBundle)
-            return true
-        } else {
-            failedBundles.insert(pluginBundle)
-            return false
+        if let core = resultPlugins["MBoxCore"] {
+            core.module(named: "MBoxCore")?.bundlePath = self.bundle.bundlePath
         }
-    }
 
-    public func unload(package: MBPluginPackage) -> Bool {
-        if package.CLI == true, !package.unload() {
-            return false
-        }
-        packages.remove(package)
-        return true
-    }
-
-    public func loadAll() {
-        // 1. Get All Packages
-        let packages = self.allPackages.values
-        var loadedBundles = Set<MBPluginPackage.PluginBundle>()
-        var failedBundles = Set<MBPluginPackage.PluginBundle>()
-
-        logLoad("Load Plugins...")
-
-        // 2. Load Package Loader
-        logLoad("Load Loader:")
-        for bundle in packages.compactMap({ $0.pluginBundle(for: "Loader") }) {
-            load(pluginBundle: bundle,
-                 loadedBundles: &loadedBundles,
-                 failedBundles: &failedBundles)
-        }
-        // 3. Load Required Packages ( without forward dependencies )
-        logLoad("Load required plugin:")
-        let requiredBundles = packages.filter{ $0.required && $0.forwardDependencies == nil }.compactMap { $0.defaultBundle }
-        for bundle in requiredBundles {
-            load(pluginBundle: bundle,
-                 loadedBundles: &loadedBundles,
-                 failedBundles: &failedBundles)
-        }
-        // 4. Load Plugins
-        logLoad("Load user plugins:")
-        for name in UI.cachedPlugins.keys {
-            if let package = packages.first(where: { $0.isPlugin(name) }),
-               package.forwardDependencies == nil {
-                if let bundle = package.defaultBundle {
-                    load(pluginBundle: bundle,
-                         loadedBundles: &loadedBundles,
-                         failedBundles: &failedBundles)
-                } else {
-                    self.packages.insert(package)
-                }
-            }
-        }
-        // 5. Load Plugins Again
-        logLoad("Load user plugins again:")
-        UI.cachedPlugins.merge(UI.plugins) { ($0 + $1).withoutDuplicates() }
-        for name in UI.cachedPlugins.keys {
-            if let package = packages.first(where: { $0.isPlugin(name) }),
-               package.forwardDependencies == nil {
-               if let bundle = package.defaultBundle {
-                load(pluginBundle: bundle,
-                     loadedBundles: &loadedBundles,
-                     failedBundles: &failedBundles)
-               } else {
-                self.packages.insert(package)
-               }
-            }
-        }
-        // 6. Load Activated Plugins With Forward Dependencies
-        logLoad("Load plugins with forward dependencies:")
-        var forwardPackages = packages.filter { $0.forwardDependencies != nil }.filter { package in
-            if package.required {
-                return true
-            }
-            return UI.cachedPlugins.keys.contains { package.isPlugin($0) }
-        }
-        while true {
-            var loaded = false
-            for package in Array(forwardPackages) {
-                guard let forwardDependencies = package.forwardDependencies,
-                      forwardPackages.count > 0 else {
-                    continue
-                }
-                let satisfied = self.isSatisfied(forwardDependencies,
-                                                 in: loadedBundles.filter { $0.name.isEmpty }
-                                                    .compactMap(\.package))
-                if satisfied, let bundle = package.defaultBundle {
-                    forwardPackages.removeAll(package)
-                    if load(pluginBundle: bundle,
-                            loadedBundles: &loadedBundles,
-                            failedBundles: &failedBundles) {
-                        loaded = true
-                    }
-                }
-            }
-            if !loaded {
-                break
-            }
-        }
-        if failedBundles.count > 0 {
-            UI.log(warn: "Load Plugin Failed:", items: failedBundles.map { $0.name }, summary: false)
-        }
-    }
-
-    private func isSatisfied(_ constraints: [String: String?], in packages: [MBPluginPackage]) -> Bool {
-        for (name, _) in constraints {
-            if !packages.contains(where: { $0.isPlugin(name) }) {
-                return false
-            }
-        }
-        return true
-    }
-
-    dynamic
-    public func additionalPluginPackages() -> [String: [MBSetting.PluginDescriptor]] {
-        return [:]
-    }
-
-    @discardableResult
-    public func runAll() -> Set<MBPluginPackage> {
-        self.loadAll()
-        return packages
-    }
-
-    dynamic
-    public func registerCommander() {
-        for package in self.allPackages.values {
-            package.registerCommanders()
-        }
-    }
-
-    private func logLoad(_ msg: String,
-                         items: [String]? = nil,
-                         file: StaticString = #file,
-                         function: StaticString = #function,
-                         line: UInt = #line) {
-        if ProcessInfo.processInfo.environment["DYLD_PRINT_LIBRARIES"] == "1" {
-            UI.log(info: msg, items: items, pip: .ERR, file: file, function: function, line: line)
-        }
+        return Array(resultPlugins.values)
     }
 }
 
@@ -346,10 +250,13 @@ public func getModuleName(forClass: AnyClass) -> String {
 }
 
 extension NSObject {
-    public class var pluginPackage: MBPluginPackage? {
+    public class var pluginModule: MBPluginModule? {
         let bundle = Bundle(for: self)
-        let path = bundle.bundlePath.deletingLastPathComponent
-        return MBPluginManager.shared.allPackages.values.first { $0.nativeBundleDir == path
-        }
+        let path = bundle.bundlePath
+        return MBPluginManager.shared.modules.first { $0.bundlePath == path }
+    }
+
+    public class var pluginPackage: MBPluginPackage? {
+        return self.pluginModule?.package
     }
 }

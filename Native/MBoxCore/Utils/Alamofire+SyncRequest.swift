@@ -70,7 +70,7 @@ extension URLConvertible {
                         // Wait for URLCache store cache asynchronously
                         if let httpResponse = response.response, let data = response.data, httpResponse.statusCode == 200 {
                             DispatchQueue.global().async {
-                                UI.log(verbose: "Save response to cache. Request URL=[\(httpResponse.url?.description ?? "")].")
+                                // UI.log(verbose: "Save response to cache. Request URL=[\(httpResponse.url?.description ?? "")].")
                                 MBURLCache.sharedCache.storeCachedResponse(CachedURLResponse(response: httpResponse, data: data), for: encodedURLRequest)
                             }
                         }

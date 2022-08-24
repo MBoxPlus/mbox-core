@@ -7,15 +7,42 @@
 //
 
 import Foundation
-import CocoaLumberjack
 import Yams
 
-public var UI: MBSession { return MBSession.current! }
+public var UI: MBThread { return MBThread.current }
 
-extension MBSession {
+extension MBThread {
 
-    open func indentLog<T>(flag: DDLogFlag, block: () throws -> T) rethrows -> T {
-        self.indents.append(flag)
+    public struct LogInfo {
+        public var flag: MBLogFlag
+        public var message: String
+        public var items: [String]?
+        public var file: StaticString
+        public var function: StaticString
+        public var line: UInt
+
+        public var description: String {
+            var strings = [String]()
+            switch flag {
+            case .warning:
+                strings << "[!] \(message)".ANSI(.yellow)
+            case .error:
+                strings << "[X] \(message)".ANSI(.red, bright: true)
+            default:
+                strings << message
+            }
+            if let items = self.items {
+                for item in items {
+                    strings.append("  " + item)
+                }
+            }
+            return strings.joined(separator: "\n")
+        }
+    }
+
+    func indentLog<T>(flag: MBLogFlag, pip: MBLoggerPipe? = nil, block: () throws -> T) rethrows -> T {
+        let pip = pip ?? self.indents.last?.pip ?? .OUT
+        self.indents.append((flag: flag, pip: pip))
         defer {
             if !self.indents.isEmpty {
                 self.indents.removeLast()
@@ -23,23 +50,45 @@ extension MBSession {
         }
         return try block()
     }
+}
 
-    open func gets() -> String {
-        let value = (readLine() ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        log(info: value, pip: .FILE)
-        return value
+extension MBThread {
+
+    public func gets(prompt: String,
+                     hint: ((String) -> String?)? = nil) throws -> String {
+        let ln = LineNoise(terminal: self.terminal!)
+        guard ln.mode == .supportedTTY else {
+            throw RuntimeError("Query user in non-interactive shell is allowed.")
+        }
+        if let hint = hint {
+            ln.setHintsCallback { currentBuffer in
+                guard let value = hint(currentBuffer)?.dropFirst(currentBuffer.count) else { return (nil, nil) }
+                return (String(value), (127, 0, 127))
+            }
+        }
+        let prompt = prompt.ANSI(.yellow) + " "
+        UI.log(info: prompt, newLine: false)
+        let input = try ln.getLine(prompt: "").trimmingCharacters(in: .whitespacesAndNewlines)
+        log(info: input, pip: .FILE)
+        return input
     }
 
-    open func gets(_ message: String, default: String? = nil, items: [String] = []) -> String {
+    public func gets(_ message: String,
+                     default: String? = nil,
+                     items: [String] = [],
+                     hint: ((String) -> String?)? = nil) throws -> String {
         let mappedItems = items.map { (name: $0, value: $0) }
         if let defaultValue = `default` {
-            return gets(message, default: (name: defaultValue, value: defaultValue), items: mappedItems)
+            return try gets(message, default: (name: defaultValue, value: defaultValue), items: mappedItems, hint: hint)
         } else {
-            return gets(message, default: nil, items: mappedItems)
+            return try gets(message, default: nil, items: mappedItems, hint: hint)
         }
     }
 
-    open func gets(_ message: String, default: (name: String, value: String)?, items: [(name: String, value: String)] = []) -> String {
+    public func gets(_ message: String,
+                     default: (name: String, value: String)?,
+                     items: [(name: String, value: String)] = [],
+                     hint: ((String) -> String?)? = nil) throws -> String {
         let prompt: String
         if items.count > 0 {
             let items = items.map { (item) -> (name: String, value: String) in
@@ -59,9 +108,17 @@ extension MBSession {
         if Set(shortItems).count != shortItems.count {
             shortItems = []
         }
+        let hint2 = { (input: String) -> String? in
+            if input.isEmpty, let defaultValue = `default`?.name {
+                return defaultValue
+            }
+            if let hint = hint {
+                return hint(input)
+            }
+            return items.first { $0.name.hasPrefix(input) }?.name
+        }
         while true {
-            log(info: prompt.ANSI(.yellow) + " ", newLine: false)
-            var value = gets()
+            var value = try gets(prompt: prompt, hint: hint2)
             if value.count == 0 {
                 value = `default`?.value ?? ""
             }
@@ -83,7 +140,7 @@ extension MBSession {
         }
     }
 
-    open func gets(_ message: String, default: Bool? = nil) -> Bool {
+    public func gets(_ message: String, default: Bool? = nil) throws -> Bool {
         let items = ["yes", "no"]
         let defaultValue: String?
         if let d = `default` {
@@ -92,7 +149,7 @@ extension MBSession {
             defaultValue = nil
         }
         while true {
-            let value = gets(message, default: defaultValue, items: items)
+            let value = try gets(message, default: defaultValue, items: items)
             switch value {
             case "yes": return true
             case "no": return false
@@ -101,14 +158,13 @@ extension MBSession {
         }
     }
 
-    open func gets<T: CustomStringConvertible>(_ message: String, items: [T]) throws -> T {
-        if UI.fromGUI { throw RuntimeError("Could not read stdin in App.") }
+    public func gets<T: CustomStringConvertible>(_ message: String, items: [T]) throws -> T {
+        if MBProcess.shared.fromGUI { throw RuntimeError("Could not read stdin in App.") }
         for (index, item) in items.enumerated() {
             log(info: "\((index + 1).string.ANSI(.cyan)). \(item.description)")
         }
         while true {
-            log(info: message.ANSI(.cyan) + " ", newLine: false)
-            if let value = gets().int,
+            if let value = try gets(prompt: message).int,
                value > 0,
                value <= items.count {
                 return items[value - 1]
@@ -116,13 +172,17 @@ extension MBSession {
         }
     }
 
-    // MARK: log
-    open func log(api: Any,
-                  file: StaticString = #file,
-                  function: StaticString = #function,
-                  line: UInt = #line,
-                  formatter: MBLoggerAPIFormatter? = nil) {
-        var formatter = formatter ?? self.apiFormatter
+}
+
+// MARK: - Log
+extension MBThread {
+    // MARK: API
+    public func log(api: Any,
+                    file: StaticString = #file,
+                    function: StaticString = #function,
+                    line: UInt = #line,
+                    formatter: MBLoggerAPIFormatter? = nil) {
+        var formatter = formatter ?? MBProcess.shared.apiFormatter
         if formatter == .none {
             formatter = .yaml
         }
@@ -155,102 +215,53 @@ extension MBSession {
         self.log(info: string, api: true, file: file, function: function, line: line)
     }
 
-    open func log(verbose: String,
-                  pip: MBLoggerPipe? = nil,
-                  file: StaticString = #file,
-                  function: StaticString = #function,
-                  line: UInt = #line,
-                  newLine: Bool = true) {
-        logger.log(message: verbose, session: self, level: .verbose, flag: .verbose, pip: pip ?? self.defaultPipe, file: file, function: function, line: line, newLine: newLine)
+    // MARK: Verbose
+    public func log(verbose: String,
+                    pip: MBLoggerPipe? = nil,
+                    file: StaticString = #file,
+                    function: StaticString = #function,
+                    line: UInt = #line,
+                    newLine: Bool = true) {
+        logger.log(message: verbose, flag: .verbose, pip: pip, file: file, function: function, line: line, newLine: newLine)
     }
 
-    open func log(info: String,
-                  items: [String]? = nil,
-                  api: Bool = false,
-                  pip: MBLoggerPipe? = nil,
-                  file: StaticString = #file,
-                  function: StaticString = #function,
-                  line: UInt = #line,
-                  newLine: Bool = true) {
-        let level: DDLogLevel = api ? .all : .info
-        let flag: DDLogFlag = api ? .api : .info
-        logger.log(message: info, session: self, level: level, flag: flag, pip: pip ?? self.defaultPipe, file: file, function: function, line: line, newLine: newLine)
-        if let items = items {
-            self.indentLog(flag: flag) {
-                for item in items {
-                    logger.log(message: "- \(item)", session: self, level: level, flag: flag, file: file, function: function, line: line, newLine: newLine)
-                }
-            }
+    public func log(verbose: String,
+                    items: [String]?,
+                    pip: MBLoggerPipe? = nil,
+                    file: StaticString = #file,
+                    function: StaticString = #function,
+                    line: UInt = #line) {
+        log(verbose: verbose, pip: pip, file: file, function: function, line: line)
+        guard let items = items else { return }
+        for item in items {
+            log(verbose: "- \(item)", pip: pip, file: file, function: function, line: line)
         }
-    }
-
-    open func log(warn: String,
-                  items: [String]? = nil,
-                  summary: Bool = true,
-                  file: StaticString = #file,
-                  function: StaticString = #function,
-                  line: UInt = #line) {
-        let info = LogInfo(flag: .warning, message: warn, items: items, file: file, function: function, line: line)
-        log(info: info, verbose: true)
-        if summary {
-            self.warnings << info
-        }
-    }
-
-    open func log(error: String,
-                  output: Bool = true,
-                  file: StaticString = #file,
-                  function: StaticString = #function,
-                  line: UInt = #line) {
-        let info = LogInfo(flag: .error, message: error, file: file, function: function, line: line)
-        if output {
-            log(info: info, verbose: true)
-        }
-        self.errors << info
     }
 
     @discardableResult
-    open func log<T>(info: String?,
-                     pip: MBLoggerPipe? = nil,
-                     file: StaticString = #file,
-                     function: StaticString = #function,
-                     line: UInt = #line,
-                     block: () throws -> T) rethrows -> T {
-        if let info = info {
-            log(info: info, pip: pip, file: file, function: function, line: line)
-        }
-        return try self.indentLog(flag: .info) {
+    public func log<T>(verbose: String,
+                       items: [String]? = nil,
+                       pip: MBLoggerPipe? = nil,
+                       file: StaticString = #file,
+                       function: StaticString = #function,
+                       line: UInt = #line,
+                       block: () throws -> T) rethrows -> T {
+        log(verbose: verbose, items: items, pip: pip, file: file, function: function, line: line)
+        return try self.indentLog(flag: .verbose, pip: pip) {
             return try block()
         }
     }
 
     @discardableResult
-    open func log<T>(verbose: String,
-                     items: [String]? = nil,
-                     file: StaticString = #file,
-                     function: StaticString = #function,
-                     line: UInt = #line,
-                     block: () throws -> T) rethrows -> T {
-        log(verbose: verbose, file: file, function: function, line: line)
-        if let items = items {
-            for item in items {
-                log(verbose: "- \(item)", file: file, function: function, line: line)
-            }
-        }
-        return try self.indentLog(flag: .verbose) {
-            return try block()
-        }
-    }
-
-    @discardableResult
-    open func log<T>(verbose: String,
-                     resultOutput: (T) -> String?,
-                     file: StaticString = #file,
-                     function: StaticString = #function,
-                     line: UInt = #line,
-                     block: () throws -> T) rethrows -> T {
-        log(verbose: verbose, file: file, function: function, line: line)
-        return try self.indentLog(flag: .verbose) {
+    public func log<T>(verbose: String,
+                       resultOutput: (T) -> String?,
+                       pip: MBLoggerPipe? = nil,
+                       file: StaticString = #file,
+                       function: StaticString = #function,
+                       line: UInt = #line,
+                       block: () throws -> T) rethrows -> T {
+        log(verbose: verbose, pip: pip, file: file, function: function, line: line)
+        return try self.indentLog(flag: .verbose, pip: pip) {
             let result = try block()
             if let r = resultOutput(result) {
                 log(verbose: r, file: file, function: function, line: line)
@@ -259,14 +270,70 @@ extension MBSession {
         }
     }
 
-    public func log(summary: String,
+    // MARK: Info
+    public func log(info: String,
+                    items: [String]? = nil,
+                    api: Bool = false,
+                    pip: MBLoggerPipe? = nil,
+                    file: StaticString = #file,
+                    function: StaticString = #function,
+                    line: UInt = #line,
+                    newLine: Bool = true) {
+        let flag: MBLogFlag = api ? .api : .info
+        logger.log(message: info, flag: flag, pip: pip, file: file, function: function, line: line, newLine: newLine)
+        guard let items = items else { return }
+        self.indentLog(flag: .info, pip: pip) {
+            for item in items {
+                var lines = item.split(separator: "\n")
+                logger.log(message: "- \(lines.removeFirst())", flag: flag, file: file, function: function, line: line, newLine: newLine)
+                for text in lines {
+                    logger.log(message: "  \(text)", flag: flag, file: file, function: function, line: line, newLine: newLine)
+                }
+            }
+        }
+    }
+
+    @discardableResult
+    public func log<T>(info: String?,
+                       pip: MBLoggerPipe? = nil,
+                       file: StaticString = #file,
+                       function: StaticString = #function,
+                       line: UInt = #line,
+                       block: () throws -> T) rethrows -> T {
+        if let info = info {
+            log(info: info, pip: pip, file: file, function: function, line: line)
+        }
+        return try self.indentLog(flag: .info, pip: pip) {
+            return try block()
+        }
+    }
+
+    // MARK: Warn
+    public func log(warn: String,
+                    items: [String]? = nil,
+                    summary: Bool = true,
                     file: StaticString = #file,
                     function: StaticString = #function,
                     line: UInt = #line) {
-        let info = LogInfo(flag: .info, message: summary, file: file, function: function, line: line)
-        self.infos << info
+        let info = LogInfo(flag: .warning, message: warn, items: items, file: file, function: function, line: line)
+        log(info: info, verbose: false)
+        if summary {
+            MBProcess.shared.addSummary(.warning, info: info)
+        }
     }
 
+    // MARK: Error
+    public func log(error: String,
+                    output: Bool = true,
+                    file: StaticString = #file,
+                    function: StaticString = #function,
+                    line: UInt = #line) {
+        let info = LogInfo(flag: .error, message: error, file: file, function: function, line: line)
+        log(info: info, verbose: false)
+        MBProcess.shared.addSummary(.error, info: info)
+    }
+
+    // MARK: Section
     dynamic
     public func section(_ title: String,
                         file: StaticString = #file,
@@ -275,8 +342,8 @@ extension MBSession {
         if self.indents.isEmpty {
             self.title = title
         }
-        let title = logger.verbose ? title.ANSI(.yellow) : title
-        logger.log(message: title, session: self, level: .info, flag: .info, pip: self.defaultPipe, file: file, function: function, line: line)
+        let title = MBProcess.shared.verbose ? title.ANSI(.yellow) : title
+        logger.log(message: title, flag: .info, file: file, function: function, line: line)
     }
 
     @discardableResult
@@ -293,32 +360,40 @@ extension MBSession {
         }
     }
 
-    internal func log(info: LogInfo, verbose: Bool = false) {
+    // MARK: Private
+    func log(summary: String,
+             file: StaticString = #file,
+             function: StaticString = #function,
+             line: UInt = #line) {
+        let info = LogInfo(flag: .info, message: summary, file: file, function: function, line: line)
+        MBProcess.shared.addSummary(.info, info: info)
+    }
+
+    func log(info: LogInfo, verbose: Bool = false) {
         logger.log(message: info.description,
-                   session: self,
-                   level: verbose ? .verbose : .info,
                    flag: verbose ? .verbose : info.flag,
                    file: info.file,
                    function: info.function,
                    line: info.line)
     }
 
-    internal func logSummary() {
-        if !infos.isEmpty {
+    func logSummary() {
+        let process = MBProcess.shared
+        if !process.infos.isEmpty {
             log(info: "")
-            for info in infos {
+            for info in process.infos {
                 log(info: info)
             }
         }
-        if !warnings.isEmpty {
+        if !process.warnings.isEmpty {
             log(info: "")
-            for warn in warnings {
+            for warn in process.warnings {
                 log(info: warn)
             }
         }
-        if !errors.isEmpty {
+        if !process.errors.isEmpty {
             log(info: "")
-            for error in errors {
+            for error in process.errors {
                 log(info: error)
             }
         }

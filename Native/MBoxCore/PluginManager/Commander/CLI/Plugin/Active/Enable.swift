@@ -14,12 +14,6 @@ extension MBCommander.Plugin {
             return "Enable plugins by name."
         }
 
-        open override func run() throws {
-            self.isScopeCheckNeeded = true
-
-            try super.run()
-        }
-
         open override func handle(_ setting: MBSetting) throws {
             try super.handle(setting)
             for name in self.names {

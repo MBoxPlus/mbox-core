@@ -38,6 +38,9 @@ extension ObjCShell: MBInputHandlerDelegate {
 }
 
 open class MBCMD: NSObject {
+    open var UI: MBThread
+    public static var UI: MBThread { return MBThread.current }
+
     open var useTTY: Bool
     open class var isCMDEnvironment: Bool {
         set {
@@ -56,13 +59,13 @@ open class MBCMD: NSObject {
         return shell.errorString
     }
 
-    open var workingDirectory: String?
+    open lazy var workingDirectory: String = MBProcess.shared.rootPath
 
     dynamic
     open func setupEnvironment(_ base: [String: String]? = nil) -> [String: String] {
         var env = base ?? [:]
         env["MBox"] = MBoxCore.bundle.shortVersion
-        env["MBOX_ARGS"] = UI.args.rawDescription
+        env["MBOX_ARGS"] = MBProcess.shared.args.rawDescription
         env["NSUnbufferedIO"] = "YES"
         env["MBOX_CLI_PATH"] = ProcessInfo.processInfo.arguments.first!
         return env
@@ -76,7 +79,9 @@ open class MBCMD: NSObject {
 
     dynamic
     public required init(useTTY: Bool? = nil) {
-        self.useTTY = useTTY ?? !UI.fromGUI
+        let ui = MBThread.current
+        self.UI = ui
+        self.useTTY = (useTTY ?? true) && (ui.terminal?.isTTY ?? false)
         super.init()
         self.setup()
     }
@@ -89,19 +94,27 @@ open class MBCMD: NSObject {
     }
 
     public var showOutput: Bool = false
+    public var quite: Bool = false
 
     func scriptPath(name: String, ofType: String) -> String {
         return ObjCShell.script(forName: name, ofType: ofType)
     }
 
     open var bin: String = ""
+    open var args: [String] = []
 
     open var binExists: Bool {
         return Self.executableExists(self.bin, env: self.env)
     }
 
     open func cmdString(_ string: String, sudo: Bool = false, prompt: String? = nil) -> String {
-        let string = bin.isEmpty ? string : "\(bin) \(string)"
+        var items = [String]()
+        if !self.bin.isEmpty {
+            items.append(self.bin)
+        }
+        items.append(contentsOf: self.args)
+        items.append(string)
+        let string = items.joined(separator: " ")
         if sudo {
             return ObjCShell.command(withAdministrator: string, prompt: prompt ?? "Password:")!
         }
@@ -134,17 +147,19 @@ open class MBCMD: NSObject {
         if let code = exitSignal { return code }
         let workingDirectory = workingDirectory ?? self.workingDirectory
         let string = self.cmdString(string, sudo: sudo)
-        let title = workingDirectory == nil || workingDirectory == FileManager.pwd ? "" : "$ cd \(workingDirectory!.quoted)\n"
+        let title = workingDirectory == FileManager.pwd ? "" : "$ cd \(workingDirectory.quoted)\n"
         return UI.log(verbose: "\(title)$ \(string)".ANSI(.cyan)) {
-            self.shell.logOutputStringBlock = { self.logOutputString($0) }
-            self.shell.logErrorStringBlock = { self.logErrorString($0) }
+            if !quite {
+                self.shell.logOutputStringBlock = { self.logOutputString($0) }
+                self.shell.logErrorStringBlock = { self.logErrorString($0) }
+            }
             UI.runningCMDs.append(self)
             defer {
                 self.shell.logOutputStringBlock = nil
                 self.shell.logErrorStringBlock = nil
                 UI.runningCMDs.removeAll { $0 === self }
             }
-            var environment = ProcessInfo.processInfo.environment
+            var environment = MBProcess.shared.environment
             environment.mergeEnvironment(env: self.env)
             if let env = env {
                 environment.mergeEnvironment(env: env)
@@ -154,6 +169,23 @@ open class MBCMD: NSObject {
                 MBInputHandler.shared.removeDelegate(self.shell)
             }
             return self.shell.executeCommand(string, inWorkingDirectory: workingDirectory, env: environment)
+        }
+    }
+
+    public func detach(_ string: String, env: [String: String]? = nil) {
+        try? self.setupExecute()
+        if let _ = exitSignal { return }
+        let workingDirectory = self.workingDirectory
+        let string = self.cmdString(string, sudo: false)
+        let title = workingDirectory == FileManager.pwd ? "" : "$ cd \(workingDirectory.quoted)\n"
+        UI.log(verbose: "\(title)$ [DETACH] \(string)".ANSI(.cyan)) {
+            var environment = ProcessInfo.processInfo.environment
+            environment.mergeEnvironment(env: self.env)
+            if let env = env {
+                environment.mergeEnvironment(env: env)
+            }
+            self.shell.detach = true
+            self.shell.executeCommand(string, inWorkingDirectory: workingDirectory, env: environment)
         }
     }
 
@@ -185,7 +217,7 @@ open class MBCMD: NSObject {
         if let env = env {
             cmd.env = env
         }
-        return cmd.exec("which \(executable.split(separator: " ").first!)") == 0
+        return cmd.exec("which \(argumentParse(executable).first!.quoted)") == 0
     }
 
     public static var status: Bool = false
@@ -253,28 +285,20 @@ open class MBCMD: NSObject {
     public static func installCommandLineAlias() throws {
         let supportFile = MBoxCore.bundle.bundleURL.deletingLastPathComponent().appendingPathComponent("sourced.sh").path
         let rcPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".mboxrc")
-        var resolved = false
         let string = "[[ -s \"\(supportFile)\" ]] && source \"\(supportFile)\" # MBox"
         var content = ""
         if rcPath.path.isFile {
             content = try String(contentsOf: rcPath)
-            let regex = try NSRegularExpression(pattern: "^.*? source .*?/mbox\\.sh\".*$", options: .anchorsMatchLines)
-            if let index = regex.firstMatch(in: content, range: NSRange(location: 0, length: content.count)) {
-                let range = Range(index.range, in: content)
-                content.replaceSubrange(range!, with: string)
-                resolved = true
-            }
-        }
-        if !resolved {
             if !content.hasSuffix("\n") {
                 content.append("\n")
             }
-            if !content.hasSuffix("\n\n") {
-                content.append("\n")
-            }
-            content.append(string)
+            content = content.replacingOccurrences(of: "(?m)\n.*? # MBox\n", with: "", options: .regularExpression)
+        }
+        if !content.hasSuffix("\n\n") {
             content.append("\n")
         }
+        content.append(string)
+        content.append("\n")
         UI.log(verbose: "Update `\(rcPath)`")
         try content.write(to: rcPath, atomically: true, encoding: .utf8)
     }

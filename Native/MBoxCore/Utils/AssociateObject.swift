@@ -58,9 +58,14 @@ public func associateObject<T>(base: AnyObject,
     objc_setAssociatedObject(base, key, value, .OBJC_ASSOCIATION_RETAIN)
 }
 
+public func resetAssociatedObject(base: AnyObject,
+                                  key: UnsafePointer<UInt8>) {
+    objc_setAssociatedObject(base, key, nil, .OBJC_ASSOCIATION_RETAIN)
+}
+
 private var associatedObjectKey: UInt8 = 0
 extension NSObject {
-    open var objectTag: AnyObject? {
+    public var objectTag: AnyObject? {
         set {
             objc_setAssociatedObject(self, &associatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN)
         }

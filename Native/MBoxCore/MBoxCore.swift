@@ -39,10 +39,16 @@ open class MBoxCore: NSObject, MBPluginProtocol {
     public static var version: String {
         var info = "CLI Core Version: \(self.bundle.shortVersion)"
 
-        if let package = MBoxCore.pluginPackage,
-            let commitDate = package.commitDate {
-            info.append(" (\(commitDate))")
+        if let package = MBoxCore.pluginPackage {
+            if let commitDate = package.commitDate {
+                info.append(" (\(commitDate))")
+            }
+            if MBProcess.shared.verbose,
+               let swiftVersion = package.swiftVersion {
+                info.append(", Swift: v\(swiftVersion)")
+            }
         }
+
         return info
     }
 

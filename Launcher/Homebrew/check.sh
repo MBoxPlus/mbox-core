@@ -1,10 +1,14 @@
 #!/bin/sh
 
 source "${MBOX_CORE_LAUNCHER}/launcher.sh"
+source "./common.sh"
 
-if mbox_check_exist brew; then
-    echo "Homebrew installed."
-else
-    mbox_print_error "Homebrew is not installed."
+check_brew_installed
+if [[ $? != 0 ]]; then
+    exit 1
+fi
+
+check_brew_version
+if [[ $? != 0 ]]; then
     exit 1
 fi

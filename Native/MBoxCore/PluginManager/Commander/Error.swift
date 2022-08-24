@@ -44,6 +44,7 @@ public enum ArgumentError: Equatable, CustomStringConvertible, LocalizedError {
     case undeclaredArgument(String)
     case invalidCommand(String?)
     case conflict(String)
+    case help(String?)
 
     public var errorDescription: String? {
         return description
@@ -78,6 +79,8 @@ public enum ArgumentError: Equatable, CustomStringConvertible, LocalizedError {
             return command ?? ""
         case .conflict(let message):
             return message
+        case .help(let message):
+            return message ?? ""
         }
     }
 

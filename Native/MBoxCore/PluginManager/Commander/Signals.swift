@@ -51,7 +51,7 @@ public func performSignal(_ signal: Int32) {
     exitSignal = signal
     DispatchQueue.global().async {
         while !UI.runningCMDs.isEmpty {
-            sleep(1)
+            usleep(useconds_t(0.3 * 1000000))
         }
         for action in actions.reversed() {
             action(signal)

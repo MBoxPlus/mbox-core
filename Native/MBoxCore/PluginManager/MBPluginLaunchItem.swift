@@ -25,9 +25,6 @@ public final class MBPluginLaunchItem: MBCodableObject {
     public weak var plugin: MBPluginPackage!
 
     @Codable
-    public var required: Bool = false
-
-    @Codable
     public var dependencies: [String]?
 
     @Codable

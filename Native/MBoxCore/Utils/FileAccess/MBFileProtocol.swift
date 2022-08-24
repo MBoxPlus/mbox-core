@@ -84,9 +84,11 @@ extension MBFileProtocol {
         if FileManager.default.fileExists(atPath: path) {
             do {
                 let content = try String(contentsOf: URL(fileURLWithPath: path), encoding: .utf8)
-                var item = try load(fromString: content, coder: coder)
-                item.filePath = path
-                return item
+                if !content.trimmed.isEmpty {
+                    var item = try load(fromString: content, coder: coder)
+                    item.filePath = path
+                    return item
+                }
             } catch {
                 UI.log(error: "Decode failed: \(path)\n\t\(error.localizedDescription)")
             }
@@ -102,9 +104,11 @@ extension MBFileProtocol {
         guard let coder = coder(for: path.pathExtension) ?? Self.defaultCoder else { return nil }
         do {
             let content = try String(contentsOf: URL(fileURLWithPath: path), encoding: .utf8)
-            var item = try load(fromString: content, coder: coder)
-            item.filePath = path
-            return item
+            if !content.trimmed.isEmpty {
+                var item = try load(fromString: content, coder: coder)
+                item.filePath = path
+                return item
+            }
         } catch {
             UI.log(error: "Decode failed: \(path)\n\t\(error.localizedDescription)")
         }

@@ -3,10 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		251B391227672DB700029634 /* SystemInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 251B391127672DB700029634 /* SystemInfo.swift */; };
 		2521F76625652FA300BDA4B5 /* Uninstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2521F76525652FA300BDA4B5 /* Uninstall.swift */; };
 		2521F76C256531EF00BDA4B5 /* MBPluginManager+Uninstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2521F76B256531EF00BDA4B5 /* MBPluginManager+Uninstaller.swift */; };
 		258589CE244020F6004D459D /* String+Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258589CD244020F6004D459D /* String+Version.swift */; };
@@ -14,11 +15,24 @@
 		259820B124594F9B00D473C8 /* MBPluginSettingSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259820B024594F9B00D473C8 /* MBPluginSettingSchema.swift */; };
 		25A6FDB6259C7BBF0074D30A /* AppSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A6FDB5259C7BBE0074D30A /* AppSupport.swift */; };
 		25D9B83A24F7EC50006DC1E5 /* MBUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25D9B83924F7EC50006DC1E5 /* MBUser.swift */; };
+		2B9E6F602733809400360342 /* ResolverError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9E6F562733809400360342 /* ResolverError.swift */; };
+		2B9E6F612733809400360342 /* PinnedVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9E6F572733809400360342 /* PinnedVersion.swift */; };
+		2B9E6F622733809400360342 /* Resolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9E6F582733809400360342 /* Resolver.swift */; };
+		2B9E6F632733809400360342 /* DB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9E6F5A2733809400360342 /* DB.swift */; };
+		2B9E6F642733809400360342 /* TestResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9E6F5B2733809400360342 /* TestResolver.swift */; };
+		2B9E6F652733809400360342 /* Dependency.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9E6F5C2733809400360342 /* Dependency.swift */; };
+		2B9E6F662733809400360342 /* SemanticVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9E6F5D2733809400360342 /* SemanticVersion.swift */; };
+		2B9E6F672733809400360342 /* Scannable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9E6F5E2733809400360342 /* Scannable.swift */; };
+		2B9E6F682733809400360342 /* VersionSpecifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9E6F5F2733809400360342 /* VersionSpecifier.swift */; };
 		AB08F60925F0C8F400CF41A8 /* MBInputHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB08F60825F0C8F400CF41A8 /* MBInputHandler.swift */; };
 		AB0FF4F922CFB0860011C0B8 /* ANSI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0FF4F822CFB0860011C0B8 /* ANSI.swift */; };
 		AB0FF4FD22CFB54C0011C0B8 /* MBRootCommander.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0FF4FC22CFB54C0011C0B8 /* MBRootCommander.swift */; };
 		AB0FF50322CFBA670011C0B8 /* MBCommanderRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0FF50222CFBA670011C0B8 /* MBCommanderRunner.swift */; };
-		AB0FF50522CFD7D50011C0B8 /* MBTTYLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0FF50422CFD7D50011C0B8 /* MBTTYLogger.swift */; };
+		AB0FF50522CFD7D50011C0B8 /* Terminal.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0FF50422CFD7D50011C0B8 /* Terminal.swift */; };
+		AB132E232711DA2100A6AF11 /* MBPluginManager+PluginLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB132E222711DA2100A6AF11 /* MBPluginManager+PluginLoader.swift */; };
+		AB132FCA27141FBD00A6AF11 /* Env+Show.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB132FC927141FBD00A6AF11 /* Env+Show.swift */; };
+		AB13308F27143B2000A6AF11 /* Env+Show+System.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB13308E27143B2000A6AF11 /* Env+Show+System.swift */; };
+		AB13309127143DB200A6AF11 /* Env+Show+Plugins.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB13309027143DB200A6AF11 /* Env+Show+Plugins.swift */; };
 		AB24BB51268F3E8C008A73BB /* LoadBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB24BB50268F3E8C008A73BB /* LoadBundle.swift */; };
 		AB24BB52268F3E8C008A73BB /* LoadBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB24BB50268F3E8C008A73BB /* LoadBundle.swift */; };
 		AB24BB56268F3F5C008A73BB /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB24BB54268F3F5C008A73BB /* main.swift */; };
@@ -61,11 +75,23 @@
 		AB35C46A230D3C2A00FE97CC /* List.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB35C469230D3C2A00FE97CC /* List.swift */; };
 		AB36B1EF2563E2C200DC9DBA /* Disable.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB36B1EE2563E2C200DC9DBA /* Disable.swift */; };
 		AB36B2002564016C00DC9DBA /* Activate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB36B1FF2564016C00DC9DBA /* Activate.swift */; };
+		AB4045422760AF9900EB8B5B /* MD5.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4045412760AF9900EB8B5B /* MD5.swift */; };
+		AB474309272BF78200344242 /* linenoise.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB474302272BF78100344242 /* linenoise.swift */; };
+		AB47430B272BF78200344242 /* EditState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB474304272BF78100344242 /* EditState.swift */; };
+		AB47430C272BF78200344242 /* AnsiCodes.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB474305272BF78100344242 /* AnsiCodes.swift */; };
+		AB47430D272BF78200344242 /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB474306272BF78100344242 /* Errors.swift */; };
+		AB47430E272BF78200344242 /* History.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB474307272BF78100344242 /* History.swift */; };
+		AB47430F272BF78200344242 /* ControlCharacters.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB474308272BF78100344242 /* ControlCharacters.swift */; };
+		AB47431327314F0100344242 /* Spinner.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB47431127314F0100344242 /* Spinner.swift */; };
+		AB47431427314F0100344242 /* SpinnerPattern.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB47431227314F0100344242 /* SpinnerPattern.swift */; };
+		AB4743162733F58800344242 /* SpinnerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4743152733F58800344242 /* SpinnerManager.swift */; };
 		AB4A30D022B37E41005F445B /* UI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4A30CF22B37E41005F445B /* UI.swift */; };
 		AB4A30DD22B39E5D005F445B /* MBCMD.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4A30DC22B39E5C005F445B /* MBCMD.swift */; };
 		AB4A30DF22B3AA9B005F445B /* RSyncCMD.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4A30DE22B3AA9B005F445B /* RSyncCMD.swift */; };
 		AB4A30FA22B658F9005F445B /* GitURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4A30F922B658F9005F445B /* GitURL.swift */; };
 		AB525BB5268B182D00227764 /* sourced.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = AB525BB4268B181400227764 /* sourced.sh */; };
+		AB54BE4927D1B95F00B63725 /* MBPluginModule+History.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB54BE4827D1B95F00B63725 /* MBPluginModule+History.swift */; };
+		AB54BE4B27D1B9E000B63725 /* MBPluginHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB54BE4A27D1B9E000B63725 /* MBPluginHistory.swift */; };
 		AB5AF8C723CC7C7A00C68E70 /* MBCodableArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB5AF8C623CC7C7A00C68E70 /* MBCodableArray.swift */; };
 		AB5E306522EC8A73004F716F /* String+Crypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB5E306422EC8A73004F716F /* String+Crypto.swift */; };
 		AB5E306722EC8AAC004F716F /* Data+Crypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB5E306622EC8AAC004F716F /* Data+Crypto.swift */; };
@@ -73,6 +99,7 @@
 		AB64A17422A8F0DC00FD06FC /* MBCommanderGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB64A17322A8F0DC00FD06FC /* MBCommanderGroup.swift */; };
 		AB64A17922B0F66900FD06FC /* String+Just.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB64A17822B0F66900FD06FC /* String+Just.swift */; };
 		AB64A17B22B0FB4300FD06FC /* Operator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB64A17A22B0FB4300FD06FC /* Operator.swift */; };
+		AB6C412327465332001C4D9D /* libswift_Concurrency.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = AB6C41222746519E001C4D9D /* libswift_Concurrency.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		AB6D76142304803B003A0EA1 /* MBoxCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB6D76132304803B003A0EA1 /* MBoxCore.swift */; };
 		AB6ED0E22684403E0057669F /* MBEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB6ED0E12684403E0057669F /* MBEnvironment.swift */; };
 		AB6ED0E4268440A80057669F /* MBConfProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB6ED0E3268440A80057669F /* MBConfProtocol.swift */; };
@@ -115,15 +142,15 @@
 		AB74D6D9229D49B70013751C /* URL+Query.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D6A9229D49B70013751C /* URL+Query.swift */; };
 		AB74D6DC229D4C3C0013751C /* MBUserDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D6DB229D4C3C0013751C /* MBUserDefault.swift */; };
 		AB74D80B229E2F680013751C /* MBPluginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D7E9229E2F680013751C /* MBPluginManager.swift */; };
-		AB74D82F229E369A0013751C /* MBSession+Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D829229E369A0013751C /* MBSession+Logger.swift */; };
-		AB74D831229E369A0013751C /* MBSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D82C229E369A0013751C /* MBSession.swift */; };
-		AB74D838229E36A40013751C /* MBLogFileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D834229E36A40013751C /* MBLogFileManager.swift */; };
+		AB74D82F229E369A0013751C /* MBThread+Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D829229E369A0013751C /* MBThread+Logger.swift */; };
+		AB74D831229E369A0013751C /* MBProcess.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D82C229E369A0013751C /* MBProcess.swift */; };
+		AB74D838229E36A40013751C /* MBFileLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D834229E36A40013751C /* MBFileLogger.swift */; };
 		AB74D839229E36A40013751C /* MBLoggerFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D835229E36A40013751C /* MBLoggerFormatter.swift */; };
-		AB74D83A229E36A40013751C /* MBLoggerXcodeFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D836229E36A40013751C /* MBLoggerXcodeFormatter.swift */; };
 		AB74D83B229E36A40013751C /* MBLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D837229E36A40013751C /* MBLogger.swift */; };
 		AB74D853229E60EF0013751C /* MBFileProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D850229E60EF0013751C /* MBFileProtocol.swift */; };
 		AB74D854229E60EF0013751C /* MBYAMLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D851229E60EF0013751C /* MBYAMLProtocol.swift */; };
 		AB74D855229E60EF0013751C /* MBJSONProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB74D852229E60EF0013751C /* MBJSONProtocol.swift */; };
+		AB8D0A1927042068008B1AD4 /* String+Regex.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8D0A1827042068008B1AD4 /* String+Regex.swift */; };
 		AB8E69ED24C981E000EE6767 /* MBPluginLaunchItemHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8E69EC24C981E000EE6767 /* MBPluginLaunchItemHistory.swift */; };
 		AB980B4D26D91D8C00D9F9EA /* Doc.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB980B4C26D91D8C00D9F9EA /* Doc.swift */; };
 		AB9B4A6623C218E3001095BA /* NSString+charValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB9B4A6523C218E3001095BA /* NSString+charValue.swift */; };
@@ -144,9 +171,13 @@
 		ABC770E322A83774007DE9E4 /* Bundle+InfoDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABC770E222A83774007DE9E4 /* Bundle+InfoDictionary.swift */; };
 		ABC7DD342417F48C0095DAE6 /* Launch.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABC7DD332417F48C0095DAE6 /* Launch.swift */; };
 		ABC7DD70241A229C0095DAE6 /* MBPluginPackage.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABC7DD6F241A229B0095DAE6 /* MBPluginPackage.swift */; };
+		ABCF9D5A2779C124006BD39C /* MBPluginModule+Dependency.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABCF9D592779C124006BD39C /* MBPluginModule+Dependency.swift */; };
 		ABD4C5D823260B0F008D22EB /* ZipCMD.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD4C5D723260B0F008D22EB /* ZipCMD.swift */; };
+		ABD5F26026EA0BF5006DF0DD /* ProcessInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD5F25F26EA0BF5006DF0DD /* ProcessInfo.swift */; };
+		ABD5F32826EF5BEF006DF0DD /* Dictionary+Init.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD5F32726EF5BEF006DF0DD /* Dictionary+Init.swift */; };
+		ABD5F32A26F0D2BF006DF0DD /* MBPluginModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD5F32926F0D2BE006DF0DD /* MBPluginModule.swift */; };
 		ABD6612C230FB4B100F50309 /* Setup.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABD6612B230FB4B100F50309 /* Setup.swift */; };
-		ABE08138250619FD00CC8E4B /* MBPluginPackage+PluginBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABE08137250619FD00CC8E4B /* MBPluginPackage+PluginBundle.swift */; };
+		ABDF226027435A61007C48BB /* MBThread.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABDF225F27435A61007C48BB /* MBThread.swift */; };
 		ABE4A91C231BBAA4008DFBE7 /* MBCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABE4A91B231BBAA4008DFBE7 /* MBCodable.swift */; };
 		ABEC073825B04F9900A07FE0 /* OperatingSystemVersion.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABEC073725B04F9900A07FE0 /* OperatingSystemVersion.swift */; };
 		ABF8B47A239F849E0090904A /* Autocompletion in Resources */ = {isa = PBXBuildFile; fileRef = ABF8B479239F849E0090904A /* Autocompletion */; };
@@ -165,6 +196,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		ABA134572744F5A600B1B329 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				AB6C412327465332001C4D9D /* libswift_Concurrency.dylib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		ABA6E8F423FD41C20020E22D /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -178,6 +219,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		251B391127672DB700029634 /* SystemInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemInfo.swift; sourceTree = "<group>"; };
 		2521F76525652FA300BDA4B5 /* Uninstall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Uninstall.swift; sourceTree = "<group>"; };
 		2521F76B256531EF00BDA4B5 /* MBPluginManager+Uninstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MBPluginManager+Uninstaller.swift"; sourceTree = "<group>"; };
 		258589CD244020F6004D459D /* String+Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Version.swift"; sourceTree = "<group>"; };
@@ -185,8 +227,17 @@
 		259820B024594F9B00D473C8 /* MBPluginSettingSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBPluginSettingSchema.swift; sourceTree = "<group>"; };
 		25A6FDB5259C7BBE0074D30A /* AppSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSupport.swift; sourceTree = "<group>"; };
 		25D9B83924F7EC50006DC1E5 /* MBUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBUser.swift; sourceTree = "<group>"; };
+		2B9E6F562733809400360342 /* ResolverError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResolverError.swift; sourceTree = "<group>"; };
+		2B9E6F572733809400360342 /* PinnedVersion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PinnedVersion.swift; sourceTree = "<group>"; };
+		2B9E6F582733809400360342 /* Resolver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Resolver.swift; sourceTree = "<group>"; };
+		2B9E6F5A2733809400360342 /* DB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DB.swift; sourceTree = "<group>"; };
+		2B9E6F5B2733809400360342 /* TestResolver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestResolver.swift; sourceTree = "<group>"; };
+		2B9E6F5C2733809400360342 /* Dependency.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Dependency.swift; sourceTree = "<group>"; };
+		2B9E6F5D2733809400360342 /* SemanticVersion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SemanticVersion.swift; sourceTree = "<group>"; };
+		2B9E6F5E2733809400360342 /* Scannable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scannable.swift; sourceTree = "<group>"; };
+		2B9E6F5F2733809400360342 /* VersionSpecifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VersionSpecifier.swift; sourceTree = "<group>"; };
+		2B9E6F9F2733941D00360342 /* ResolutionProject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResolutionProject.swift; sourceTree = "<group>"; };
 		58B73386C1E43DA97097E9C0 /* Pods-MBoxCore.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MBoxCore.release.xcconfig"; path = "Target Support Files/Pods-MBoxCore/Pods-MBoxCore.release.xcconfig"; sourceTree = "<group>"; };
-		59FAC2B4991DD766EB067344 /* Pods_MBoxNodeAPI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MBoxNodeAPI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6BE2A7A30D42143AB017D017 /* Pods_MBoxCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MBoxCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB063F63238420E0000EB0DD /* Basic.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Basic.xcconfig; sourceTree = "<group>"; };
 		AB063F66238521D5000EB0DD /* manifest.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; name = manifest.yml; path = ../manifest.yml; sourceTree = "<group>"; };
@@ -195,7 +246,11 @@
 		AB0FF4F822CFB0860011C0B8 /* ANSI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ANSI.swift; sourceTree = "<group>"; };
 		AB0FF4FC22CFB54C0011C0B8 /* MBRootCommander.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBRootCommander.swift; sourceTree = "<group>"; };
 		AB0FF50222CFBA670011C0B8 /* MBCommanderRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBCommanderRunner.swift; sourceTree = "<group>"; };
-		AB0FF50422CFD7D50011C0B8 /* MBTTYLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBTTYLogger.swift; sourceTree = "<group>"; };
+		AB0FF50422CFD7D50011C0B8 /* Terminal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Terminal.swift; sourceTree = "<group>"; };
+		AB132E222711DA2100A6AF11 /* MBPluginManager+PluginLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MBPluginManager+PluginLoader.swift"; sourceTree = "<group>"; };
+		AB132FC927141FBD00A6AF11 /* Env+Show.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Env+Show.swift"; sourceTree = "<group>"; };
+		AB13308E27143B2000A6AF11 /* Env+Show+System.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Env+Show+System.swift"; sourceTree = "<group>"; };
+		AB13309027143DB200A6AF11 /* Env+Show+Plugins.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Env+Show+Plugins.swift"; sourceTree = "<group>"; };
 		AB24BB4E268F1993008A73BB /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		AB24BB50268F3E8C008A73BB /* LoadBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadBundle.swift; sourceTree = "<group>"; };
 		AB24BB54268F3F5C008A73BB /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -239,11 +294,23 @@
 		AB35C469230D3C2A00FE97CC /* List.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = List.swift; sourceTree = "<group>"; };
 		AB36B1EE2563E2C200DC9DBA /* Disable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Disable.swift; sourceTree = "<group>"; };
 		AB36B1FF2564016C00DC9DBA /* Activate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Activate.swift; sourceTree = "<group>"; };
+		AB4045412760AF9900EB8B5B /* MD5.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MD5.swift; sourceTree = "<group>"; };
+		AB474302272BF78100344242 /* linenoise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = linenoise.swift; sourceTree = "<group>"; };
+		AB474304272BF78100344242 /* EditState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditState.swift; sourceTree = "<group>"; };
+		AB474305272BF78100344242 /* AnsiCodes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnsiCodes.swift; sourceTree = "<group>"; };
+		AB474306272BF78100344242 /* Errors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
+		AB474307272BF78100344242 /* History.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = History.swift; sourceTree = "<group>"; };
+		AB474308272BF78100344242 /* ControlCharacters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ControlCharacters.swift; sourceTree = "<group>"; };
+		AB47431127314F0100344242 /* Spinner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Spinner.swift; sourceTree = "<group>"; };
+		AB47431227314F0100344242 /* SpinnerPattern.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpinnerPattern.swift; sourceTree = "<group>"; };
+		AB4743152733F58800344242 /* SpinnerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpinnerManager.swift; sourceTree = "<group>"; };
 		AB4A30CF22B37E41005F445B /* UI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UI.swift; sourceTree = "<group>"; };
 		AB4A30DC22B39E5C005F445B /* MBCMD.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBCMD.swift; sourceTree = "<group>"; };
 		AB4A30DE22B3AA9B005F445B /* RSyncCMD.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RSyncCMD.swift; sourceTree = "<group>"; };
 		AB4A30F922B658F9005F445B /* GitURL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GitURL.swift; sourceTree = "<group>"; };
 		AB525BB4268B181400227764 /* sourced.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = sourced.sh; sourceTree = "<group>"; };
+		AB54BE4827D1B95F00B63725 /* MBPluginModule+History.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MBPluginModule+History.swift"; sourceTree = "<group>"; };
+		AB54BE4A27D1B9E000B63725 /* MBPluginHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBPluginHistory.swift; sourceTree = "<group>"; };
 		AB5AF8C623CC7C7A00C68E70 /* MBCodableArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBCodableArray.swift; sourceTree = "<group>"; };
 		AB5E306422EC8A73004F716F /* String+Crypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Crypto.swift"; sourceTree = "<group>"; };
 		AB5E306622EC8AAC004F716F /* Data+Crypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Crypto.swift"; sourceTree = "<group>"; };
@@ -252,6 +319,7 @@
 		AB64A17322A8F0DC00FD06FC /* MBCommanderGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBCommanderGroup.swift; sourceTree = "<group>"; };
 		AB64A17822B0F66900FD06FC /* String+Just.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Just.swift"; sourceTree = "<group>"; };
 		AB64A17A22B0FB4300FD06FC /* Operator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Operator.swift; sourceTree = "<group>"; };
+		AB6C41222746519E001C4D9D /* libswift_Concurrency.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libswift_Concurrency.dylib; path = "Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-5.5/macosx/libswift_Concurrency.dylib"; sourceTree = DEVELOPER_DIR; };
 		AB6D76132304803B003A0EA1 /* MBoxCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBoxCore.swift; sourceTree = "<group>"; };
 		AB6ED0E12684403E0057669F /* MBEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBEnvironment.swift; sourceTree = "<group>"; };
 		AB6ED0E3268440A80057669F /* MBConfProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBConfProtocol.swift; sourceTree = "<group>"; };
@@ -294,17 +362,17 @@
 		AB74D6A9229D49B70013751C /* URL+Query.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "URL+Query.swift"; sourceTree = "<group>"; };
 		AB74D6DB229D4C3C0013751C /* MBUserDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBUserDefault.swift; sourceTree = "<group>"; };
 		AB74D7E9229E2F680013751C /* MBPluginManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBPluginManager.swift; sourceTree = "<group>"; };
-		AB74D829229E369A0013751C /* MBSession+Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MBSession+Logger.swift"; sourceTree = "<group>"; };
-		AB74D82C229E369A0013751C /* MBSession.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBSession.swift; sourceTree = "<group>"; };
-		AB74D834229E36A40013751C /* MBLogFileManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBLogFileManager.swift; sourceTree = "<group>"; };
+		AB74D829229E369A0013751C /* MBThread+Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MBThread+Logger.swift"; sourceTree = "<group>"; };
+		AB74D82C229E369A0013751C /* MBProcess.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBProcess.swift; sourceTree = "<group>"; };
+		AB74D834229E36A40013751C /* MBFileLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBFileLogger.swift; sourceTree = "<group>"; };
 		AB74D835229E36A40013751C /* MBLoggerFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBLoggerFormatter.swift; sourceTree = "<group>"; };
-		AB74D836229E36A40013751C /* MBLoggerXcodeFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBLoggerXcodeFormatter.swift; sourceTree = "<group>"; };
 		AB74D837229E36A40013751C /* MBLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBLogger.swift; sourceTree = "<group>"; };
 		AB74D83C229E373C0013751C /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; indentWidth = 2; path = Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		AB74D83D229E373C0013751C /* Podfile.lock */ = {isa = PBXFileReference; explicitFileType = text.yaml; path = Podfile.lock; sourceTree = SOURCE_ROOT; };
 		AB74D850229E60EF0013751C /* MBFileProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBFileProtocol.swift; sourceTree = "<group>"; };
 		AB74D851229E60EF0013751C /* MBYAMLProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBYAMLProtocol.swift; sourceTree = "<group>"; };
 		AB74D852229E60EF0013751C /* MBJSONProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MBJSONProtocol.swift; sourceTree = "<group>"; };
+		AB8D0A1827042068008B1AD4 /* String+Regex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Regex.swift"; sourceTree = "<group>"; };
 		AB8E69EC24C981E000EE6767 /* MBPluginLaunchItemHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBPluginLaunchItemHistory.swift; sourceTree = "<group>"; };
 		AB980B4C26D91D8C00D9F9EA /* Doc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Doc.swift; sourceTree = "<group>"; };
 		AB9B4A6523C218E3001095BA /* NSString+charValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSString+charValue.swift"; sourceTree = "<group>"; };
@@ -327,9 +395,13 @@
 		ABC770E222A83774007DE9E4 /* Bundle+InfoDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Bundle+InfoDictionary.swift"; sourceTree = "<group>"; };
 		ABC7DD332417F48C0095DAE6 /* Launch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Launch.swift; sourceTree = "<group>"; };
 		ABC7DD6F241A229B0095DAE6 /* MBPluginPackage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBPluginPackage.swift; sourceTree = "<group>"; };
+		ABCF9D592779C124006BD39C /* MBPluginModule+Dependency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MBPluginModule+Dependency.swift"; sourceTree = "<group>"; };
 		ABD4C5D723260B0F008D22EB /* ZipCMD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZipCMD.swift; sourceTree = "<group>"; };
+		ABD5F25F26EA0BF5006DF0DD /* ProcessInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessInfo.swift; sourceTree = "<group>"; };
+		ABD5F32726EF5BEF006DF0DD /* Dictionary+Init.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Dictionary+Init.swift"; sourceTree = "<group>"; };
+		ABD5F32926F0D2BE006DF0DD /* MBPluginModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBPluginModule.swift; sourceTree = "<group>"; };
 		ABD6612B230FB4B100F50309 /* Setup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Setup.swift; sourceTree = "<group>"; };
-		ABE08137250619FD00CC8E4B /* MBPluginPackage+PluginBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MBPluginPackage+PluginBundle.swift"; sourceTree = "<group>"; };
+		ABDF225F27435A61007C48BB /* MBThread.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBThread.swift; sourceTree = "<group>"; };
 		ABE4A91B231BBAA4008DFBE7 /* MBCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MBCodable.swift; sourceTree = "<group>"; };
 		ABEC073725B04F9900A07FE0 /* OperatingSystemVersion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperatingSystemVersion.swift; sourceTree = "<group>"; };
 		ABF8B479239F849E0090904A /* Autocompletion */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Autocompletion; sourceTree = "<group>"; };
@@ -389,6 +461,41 @@
 			path = User;
 			sourceTree = "<group>";
 		};
+		2B9E6F552733809400360342 /* MBPluginDependencyResolution */ = {
+			isa = PBXGroup;
+			children = (
+				2B9E6F592733809400360342 /* Tests */,
+				2B9E6F562733809400360342 /* ResolverError.swift */,
+				2B9E6F572733809400360342 /* PinnedVersion.swift */,
+				2B9E6F582733809400360342 /* Resolver.swift */,
+				2B9E6F5C2733809400360342 /* Dependency.swift */,
+				2B9E6F5D2733809400360342 /* SemanticVersion.swift */,
+				2B9E6F5E2733809400360342 /* Scannable.swift */,
+				2B9E6F5F2733809400360342 /* VersionSpecifier.swift */,
+				2B9E6F9F2733941D00360342 /* ResolutionProject.swift */,
+			);
+			path = MBPluginDependencyResolution;
+			sourceTree = "<group>";
+		};
+		2B9E6F592733809400360342 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				2B9E6F5A2733809400360342 /* DB.swift */,
+				2B9E6F5B2733809400360342 /* TestResolver.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		AB13308D27143B0100A6AF11 /* Env */ = {
+			isa = PBXGroup;
+			children = (
+				AB132FC927141FBD00A6AF11 /* Env+Show.swift */,
+				AB13308E27143B2000A6AF11 /* Env+Show+System.swift */,
+				AB13309027143DB200A6AF11 /* Env+Show+Plugins.swift */,
+			);
+			path = Env;
+			sourceTree = "<group>";
+		};
 		AB24BB53268F3F4C008A73BB /* MDevCLI */ = {
 			isa = PBXGroup;
 			children = (
@@ -428,7 +535,7 @@
 				AB4A30CD22B37E2A005F445B /* UI */,
 				AB74D833229E36A40013751C /* Logger */,
 				25D9B83824F7EC33006DC1E5 /* User */,
-				AB74D827229E369A0013751C /* Session */,
+				AB74D827229E369A0013751C /* Thread */,
 				AB74D7E7229E2F680013751C /* PluginManager */,
 				AB74D676229D49B70013751C /* Utils */,
 				AB282811229D46ED003084EF /* MBoxCore.h */,
@@ -495,6 +602,7 @@
 		AB35C465230D3BBD00FE97CC /* CLI */ = {
 			isa = PBXGroup;
 			children = (
+				AB13308D27143B0100A6AF11 /* Env */,
 				AB35C468230D3C1F00FE97CC /* Plugin */,
 				AB35C466230D3BCE00FE97CC /* Plugin.swift */,
 				ABD6612B230FB4B100F50309 /* Setup.swift */,
@@ -525,6 +633,29 @@
 				AB36B1EE2563E2C200DC9DBA /* Disable.swift */,
 			);
 			path = Active;
+			sourceTree = "<group>";
+		};
+		AB474301272BF78100344242 /* linenoise */ = {
+			isa = PBXGroup;
+			children = (
+				AB474302272BF78100344242 /* linenoise.swift */,
+				AB474304272BF78100344242 /* EditState.swift */,
+				AB474305272BF78100344242 /* AnsiCodes.swift */,
+				AB474306272BF78100344242 /* Errors.swift */,
+				AB474307272BF78100344242 /* History.swift */,
+				AB474308272BF78100344242 /* ControlCharacters.swift */,
+			);
+			path = linenoise;
+			sourceTree = "<group>";
+		};
+		AB47431027314F0000344242 /* Spinner */ = {
+			isa = PBXGroup;
+			children = (
+				AB47431127314F0100344242 /* Spinner.swift */,
+				AB47431227314F0100344242 /* SpinnerPattern.swift */,
+				AB4743152733F58800344242 /* SpinnerManager.swift */,
+			);
+			path = Spinner;
 			sourceTree = "<group>";
 		};
 		AB4A30CD22B37E2A005F445B /* UI */ = {
@@ -663,6 +794,8 @@
 		AB74D676229D49B70013751C /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				AB47431027314F0000344242 /* Spinner */,
+				AB474301272BF78100344242 /* linenoise */,
 				2585948C244440D5004D459D /* Cache */,
 				AB292650239E7CA0005212E2 /* SwifterSwift */,
 				AB719531232006710079935A /* Burritos */,
@@ -676,6 +809,7 @@
 				AB74D69B229D49B70013751C /* Bundle+URLScheme.swift */,
 				AB74D691229D49B70013751C /* DispatchGroup.swift */,
 				ABA6D5A623A8D04D000BEE16 /* Dictionary+KeyPath.swift */,
+				ABD5F32726EF5BEF006DF0DD /* Dictionary+Init.swift */,
 				ABA6D5AA23AA0169000BEE16 /* Dictionary+Merge.swift */,
 				AB74D698229D49B70013751C /* DispatchQueueSafe.swift */,
 				AB74D67B229D49B70013751C /* FileManager+Path.swift */,
@@ -691,6 +825,7 @@
 				ABB22A21262D90B70024F725 /* ResultExtension.swift */,
 				AB74D68F229D49B70013751C /* String+Character.swift */,
 				AB74D6A5229D49B70013751C /* String+Convert.swift */,
+				AB8D0A1827042068008B1AD4 /* String+Regex.swift */,
 				AB74D680229D49B70013751C /* String+Delete.swift */,
 				AB74D69E229D49B70013751C /* String+JSON.swift */,
 				AB64A17822B0F66900FD06FC /* String+Just.swift */,
@@ -700,10 +835,13 @@
 				258589CD244020F6004D459D /* String+Version.swift */,
 				AB5E306622EC8AAC004F716F /* Data+Crypto.swift */,
 				AB74D6A9229D49B70013751C /* URL+Query.swift */,
+				AB4045412760AF9900EB8B5B /* MD5.swift */,
 				AB74D684229D49B70013751C /* External Application */,
 				AB74D6DA229D4C1D0013751C /* FileAccess */,
 				ABB08E732327DAB600A5DF22 /* ThenExtension.swift */,
 				ABEC073725B04F9900A07FE0 /* OperatingSystemVersion.swift */,
+				ABD5F25F26EA0BF5006DF0DD /* ProcessInfo.swift */,
+				251B391127672DB700029634 /* SystemInfo.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -736,38 +874,43 @@
 		AB74D7E7229E2F680013751C /* PluginManager */ = {
 			isa = PBXGroup;
 			children = (
+				2B9E6F552733809400360342 /* MBPluginDependencyResolution */,
 				ABFE670322A6CD890059AE60 /* Commander */,
 				AB74D7E9229E2F680013751C /* MBPluginManager.swift */,
+				AB132E222711DA2100A6AF11 /* MBPluginManager+PluginLoader.swift */,
 				ABB4BD0E24C8405C00B755C8 /* MBPluginManager+Launcher.swift */,
 				ABC7DD6F241A229B0095DAE6 /* MBPluginPackage.swift */,
-				ABE08137250619FD00CC8E4B /* MBPluginPackage+PluginBundle.swift */,
+				ABD5F32926F0D2BE006DF0DD /* MBPluginModule.swift */,
+				AB54BE4827D1B95F00B63725 /* MBPluginModule+History.swift */,
+				ABCF9D592779C124006BD39C /* MBPluginModule+Dependency.swift */,
 				ABB4BD0524C6E0E200B755C8 /* MBPluginLaunchItem.swift */,
 				AB8E69EC24C981E000EE6767 /* MBPluginLaunchItemHistory.swift */,
 				259820B024594F9B00D473C8 /* MBPluginSettingSchema.swift */,
 				2521F76B256531EF00BDA4B5 /* MBPluginManager+Uninstaller.swift */,
+				AB54BE4A27D1B9E000B63725 /* MBPluginHistory.swift */,
 			);
 			path = PluginManager;
 			sourceTree = "<group>";
 		};
-		AB74D827229E369A0013751C /* Session */ = {
+		AB74D827229E369A0013751C /* Thread */ = {
 			isa = PBXGroup;
 			children = (
 				ABC0AE5623A62F3F004831A8 /* MBSetting.swift */,
-				AB74D82C229E369A0013751C /* MBSession.swift */,
-				AB74D829229E369A0013751C /* MBSession+Logger.swift */,
+				AB74D82C229E369A0013751C /* MBProcess.swift */,
+				ABDF225F27435A61007C48BB /* MBThread.swift */,
+				AB74D829229E369A0013751C /* MBThread+Logger.swift */,
 				AB6ED0E12684403E0057669F /* MBEnvironment.swift */,
 			);
-			path = Session;
+			path = Thread;
 			sourceTree = "<group>";
 		};
 		AB74D833229E36A40013751C /* Logger */ = {
 			isa = PBXGroup;
 			children = (
-				AB74D834229E36A40013751C /* MBLogFileManager.swift */,
-				AB74D835229E36A40013751C /* MBLoggerFormatter.swift */,
-				AB74D836229E36A40013751C /* MBLoggerXcodeFormatter.swift */,
 				AB74D837229E36A40013751C /* MBLogger.swift */,
-				AB0FF50422CFD7D50011C0B8 /* MBTTYLogger.swift */,
+				AB74D835229E36A40013751C /* MBLoggerFormatter.swift */,
+				AB74D834229E36A40013751C /* MBFileLogger.swift */,
+				AB0FF50422CFD7D50011C0B8 /* Terminal.swift */,
 			);
 			path = Logger;
 			sourceTree = "<group>";
@@ -818,9 +961,9 @@
 		E6980C468A8C9312652897C4 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				AB6C41222746519E001C4D9D /* libswift_Concurrency.dylib */,
 				AB24BB4E268F1993008A73BB /* Foundation.framework */,
 				6BE2A7A30D42143AB017D017 /* Pods_MBoxCore.framework */,
-				59FAC2B4991DD766EB067344 /* Pods_MBoxNodeAPI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -849,6 +992,7 @@
 				AB28280B229D46ED003084EF /* Frameworks */,
 				AB28280C229D46ED003084EF /* Resources */,
 				537D200DC169DE035AF2DF5F /* [CP] Embed Pods Frameworks */,
+				ABA134572744F5A600B1B329 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -900,7 +1044,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1100;
-				LastUpgradeCheck = 1300;
+				LastUpgradeCheck = 1400;
 				ORGANIZATIONNAME = bytedance;
 				TargetAttributes = {
 					AB28280D229D46ED003084EF = {
@@ -912,7 +1056,7 @@
 				};
 			};
 			buildConfigurationList = AB282808229D46ED003084EF /* Build configuration list for PBXProject "MBoxCore" */;
-			compatibilityVersion = "Xcode 12.0";
+			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -991,10 +1135,13 @@
 			files = (
 				AB6ED0E4268440A80057669F /* MBConfProtocol.swift in Sources */,
 				AB292677239E7CB5005212E2 /* BinaryFloatingPointExtensions.swift in Sources */,
+				2B9E6F652733809400360342 /* Dependency.swift in Sources */,
 				AB74D6C8229D49B70013751C /* DispatchQueueSafe.swift in Sources */,
 				AB292678239E7CB5005212E2 /* FloatExtensions.swift in Sources */,
+				AB13308F27143B2000A6AF11 /* Env+Show+System.swift in Sources */,
 				AB29267F239E7CB5005212E2 /* DoubleExtensions.swift in Sources */,
 				25A6FDB6259C7BBF0074D30A /* AppSupport.swift in Sources */,
+				AB54BE4B27D1B9E000B63725 /* MBPluginHistory.swift in Sources */,
 				AB29267B239E7CB5005212E2 /* SignedNumericExtensions.swift in Sources */,
 				AB74D839229E36A40013751C /* MBLoggerFormatter.swift in Sources */,
 				AB6D76142304803B003A0EA1 /* MBoxCore.swift in Sources */,
@@ -1002,6 +1149,7 @@
 				ABB08E742327DAB600A5DF22 /* ThenExtension.swift in Sources */,
 				ABE4A91C231BBAA4008DFBE7 /* MBCodable.swift in Sources */,
 				ABC7DD70241A229C0095DAE6 /* MBPluginPackage.swift in Sources */,
+				ABD5F26026EA0BF5006DF0DD /* ProcessInfo.swift in Sources */,
 				AB64A17922B0F66900FD06FC /* String+Just.swift in Sources */,
 				AB719550232006710079935A /* Clamping.swift in Sources */,
 				AB36B2002564016C00DC9DBA /* Activate.swift in Sources */,
@@ -1011,34 +1159,42 @@
 				AB29268A239E7CB5005212E2 /* URLRequestExtensions.swift in Sources */,
 				AB74D6B3229D49B70013751C /* String+Delete.swift in Sources */,
 				AB2CCFA8231E90E70081EF1B /* MBCodableProperty.swift in Sources */,
+				ABD5F32826EF5BEF006DF0DD /* Dictionary+Init.swift in Sources */,
 				AB8E69ED24C981E000EE6767 /* MBPluginLaunchItemHistory.swift in Sources */,
+				AB47430F272BF78200344242 /* ControlCharacters.swift in Sources */,
 				AB5E306722EC8AAC004F716F /* Data+Crypto.swift in Sources */,
 				ABA6D5AB23AA0169000BEE16 /* Dictionary+Merge.swift in Sources */,
-				AB74D838229E36A40013751C /* MBLogFileManager.swift in Sources */,
+				AB74D838229E36A40013751C /* MBFileLogger.swift in Sources */,
 				AB4A30D022B37E41005F445B /* UI.swift in Sources */,
+				ABDF226027435A61007C48BB /* MBThread.swift in Sources */,
 				AB74D6AE229D49B70013751C /* FileManager+Path.swift in Sources */,
+				AB47431327314F0100344242 /* Spinner.swift in Sources */,
 				ABC770DA22A8272B007DE9E4 /* ArgumentDescription.swift in Sources */,
 				ABC770E022A8272B007DE9E4 /* Error.swift in Sources */,
 				AB719554232006710079935A /* UndoRedo.swift in Sources */,
+				2B9E6F612733809400360342 /* PinnedVersion.swift in Sources */,
 				AB29268B239E7CB5005212E2 /* FileManagerExtensions.swift in Sources */,
-				AB74D831229E369A0013751C /* MBSession.swift in Sources */,
+				AB74D831229E369A0013751C /* MBProcess.swift in Sources */,
 				AB74D6CE229D49B70013751C /* String+JSON.swift in Sources */,
 				AB719555232006710079935A /* Lazy.swift in Sources */,
+				251B391227672DB700029634 /* SystemInfo.swift in Sources */,
+				AB47430B272BF78200344242 /* EditState.swift in Sources */,
 				ABC770DF22A8272B007DE9E4 /* ArgumentParser.swift in Sources */,
 				AB292687239E7CB5005212E2 /* NSPredicateExtensions.swift in Sources */,
 				AB29267C239E7CB5005212E2 /* DictionaryExtensions.swift in Sources */,
 				AB292685239E7CB5005212E2 /* OptionalExtensions.swift in Sources */,
 				AB74D6B6229D49B70013751C /* AssociateObject.swift in Sources */,
 				AB719530231FFA490079935A /* MBCoder.swift in Sources */,
-				AB74D83A229E36A40013751C /* MBLoggerXcodeFormatter.swift in Sources */,
 				AB719558232006710079935A /* Trimmed.swift in Sources */,
 				AB292683239E7CB5005212E2 /* IntExtensions.swift in Sources */,
 				AB74D6AA229D49B70013751C /* Bundle+Plugin.swift in Sources */,
 				AB4A30DF22B3AA9B005F445B /* RSyncCMD.swift in Sources */,
 				AB292679239E7CB5005212E2 /* SequenceExtensions.swift in Sources */,
-				ABE08138250619FD00CC8E4B /* MBPluginPackage+PluginBundle.swift in Sources */,
 				259820B124594F9B00D473C8 /* MBPluginSettingSchema.swift in Sources */,
+				2B9E6F682733809400360342 /* VersionSpecifier.swift in Sources */,
+				2B9E6F632733809400360342 /* DB.swift in Sources */,
 				AB74D6BE229D49B70013751C /* Finder.swift in Sources */,
+				AB47430D272BF78200344242 /* Errors.swift in Sources */,
 				AB74D6AD229D49B70013751C /* NSObject+Bundle.swift in Sources */,
 				AB6ED0E22684403E0057669F /* MBEnvironment.swift in Sources */,
 				AB29267D239E7CB5005212E2 /* StringExtensions.swift in Sources */,
@@ -1046,12 +1202,13 @@
 				AB29268D239E7CB5005212E2 /* LocaleExtensions.swift in Sources */,
 				AB74D6DC229D4C3C0013751C /* MBUserDefault.swift in Sources */,
 				AB74D6D2229D49B70013751C /* OptionSet+Sequence.swift in Sources */,
-				AB74D82F229E369A0013751C /* MBSession+Logger.swift in Sources */,
+				AB74D82F229E369A0013751C /* MBThread+Logger.swift in Sources */,
 				ABC73FBB2563D09C0071211F /* Enable.swift in Sources */,
 				AB292689239E7CB5005212E2 /* DataExtensions.swift in Sources */,
 				AB74D6C1229D49B70013751C /* DispatchGroup.swift in Sources */,
 				AB29268F239E7CB5005212E2 /* NSAttributedStringExtensions.swift in Sources */,
 				AB292680239E7CB5005212E2 /* RandomAccessCollectionExtensions.swift in Sources */,
+				AB132E232711DA2100A6AF11 /* MBPluginManager+PluginLoader.swift in Sources */,
 				AB35C467230D3BCE00FE97CC /* Plugin.swift in Sources */,
 				AB74D6B0229D49B70013751C /* Array+Order.swift in Sources */,
 				AB74D6C4229D49B70013751C /* AssociateWeakObject.swift in Sources */,
@@ -1060,18 +1217,24 @@
 				25D9B83A24F7EC50006DC1E5 /* MBUser.swift in Sources */,
 				AB5E306522EC8A73004F716F /* String+Crypto.swift in Sources */,
 				AB64A17422A8F0DC00FD06FC /* MBCommanderGroup.swift in Sources */,
+				AB47431427314F0100344242 /* SpinnerPattern.swift in Sources */,
 				AB719556232006710079935A /* AtomicWrite.swift in Sources */,
 				AB74D855229E60EF0013751C /* MBJSONProtocol.swift in Sources */,
 				ABB4BD0F24C8405C00B755C8 /* MBPluginManager+Launcher.swift in Sources */,
-				AB0FF50522CFD7D50011C0B8 /* MBTTYLogger.swift in Sources */,
+				AB0FF50522CFD7D50011C0B8 /* Terminal.swift in Sources */,
 				AB74D80B229E2F680013751C /* MBPluginManager.swift in Sources */,
 				AB29267A239E7CB5005212E2 /* MutableCollectionExtensions.swift in Sources */,
 				258589CE244020F6004D459D /* String+Version.swift in Sources */,
 				AB74D6C0229D49B70013751C /* Alamofire+SyncRequest.swift in Sources */,
+				ABCF9D5A2779C124006BD39C /* MBPluginModule+Dependency.swift in Sources */,
+				2B9E6F662733809400360342 /* SemanticVersion.swift in Sources */,
 				ABB4BD0624C6E0E200B755C8 /* MBPluginLaunchItem.swift in Sources */,
 				AB0FF4F922CFB0860011C0B8 /* ANSI.swift in Sources */,
+				AB13309127143DB200A6AF11 /* Env+Show+Plugins.swift in Sources */,
+				AB4743162733F58800344242 /* SpinnerManager.swift in Sources */,
 				AB315CEB23390DFA00A73EF6 /* Env.swift in Sources */,
 				AB74D6BD229D49B70013751C /* ExternalApp.swift in Sources */,
+				2B9E6F602733809400360342 /* ResolverError.swift in Sources */,
 				AB719552232006710079935A /* Copying.swift in Sources */,
 				AB292673239E7CB5005212E2 /* BidirectionalCollectionExtensions.swift in Sources */,
 				AB4A30FA22B658F9005F445B /* GitURL.swift in Sources */,
@@ -1086,10 +1249,12 @@
 				AB719557232006710079935A /* Expirable.swift in Sources */,
 				2585948E244440E5004D459D /* MBCache.swift in Sources */,
 				AB292674239E7CB5005212E2 /* ComparableExtensions.swift in Sources */,
+				AB132FCA27141FBD00A6AF11 /* Env+Show.swift in Sources */,
 				ABA6D5A723A8D04D000BEE16 /* Dictionary+KeyPath.swift in Sources */,
 				AB64A17B22B0FB4300FD06FC /* Operator.swift in Sources */,
 				ABC0AE5523A623E4004831A8 /* Config.swift in Sources */,
 				AB292684239E7CB5005212E2 /* RangeReplaceableCollectionExtensions.swift in Sources */,
+				AB54BE4927D1B95F00B63725 /* MBPluginModule+History.swift in Sources */,
 				AB292676239E7CB5005212E2 /* StringProtocolExtensions.swift in Sources */,
 				AB74D6D5229D49B70013751C /* String+Convert.swift in Sources */,
 				ABC0AE5723A62F3F004831A8 /* MBSetting.swift in Sources */,
@@ -1098,9 +1263,11 @@
 				AB29267E239E7CB5005212E2 /* BoolExtensions.swift in Sources */,
 				AB74D6CB229D49B70013751C /* Bundle+URLScheme.swift in Sources */,
 				ABC7DD342417F48C0095DAE6 /* Launch.swift in Sources */,
+				2B9E6F672733809400360342 /* Scannable.swift in Sources */,
 				AB35C46A230D3C2A00FE97CC /* List.swift in Sources */,
 				ABC770E322A83774007DE9E4 /* Bundle+InfoDictionary.swift in Sources */,
 				AB5AF8C723CC7C7A00C68E70 /* MBCodableArray.swift in Sources */,
+				AB4045422760AF9900EB8B5B /* MD5.swift in Sources */,
 				AB4A30DD22B39E5D005F445B /* MBCMD.swift in Sources */,
 				ABFD1BA7248FA1FB005F1485 /* Signals.swift in Sources */,
 				AB74D6B1229D49B70013751C /* ObjC2Swift.swift in Sources */,
@@ -1108,12 +1275,18 @@
 				AB292675239E7CB5005212E2 /* ArrayExtensions.swift in Sources */,
 				AB74D6B2229D49B70013751C /* Array+Compact.swift in Sources */,
 				AB74D6B4229D49B70013751C /* String+Path.swift in Sources */,
+				AB474309272BF78200344242 /* linenoise.swift in Sources */,
 				AB2B6E832362C8A200B86184 /* Open.swift in Sources */,
 				AB74D6D6229D49B70013751C /* NSPointerArray+WeakObject.swift in Sources */,
 				AB71954D232006710079935A /* UserDefault.swift in Sources */,
 				AB980B4D26D91D8C00D9F9EA /* Doc.swift in Sources */,
+				2B9E6F622733809400360342 /* Resolver.swift in Sources */,
 				AB292672239E7CB5005212E2 /* SignedIntegerExtensions.swift in Sources */,
+				2B9E6F642733809400360342 /* TestResolver.swift in Sources */,
+				AB47430C272BF78200344242 /* AnsiCodes.swift in Sources */,
 				ABD6612C230FB4B100F50309 /* Setup.swift in Sources */,
+				ABD5F32A26F0D2BF006DF0DD /* MBPluginModule.swift in Sources */,
+				AB8D0A1927042068008B1AD4 /* String+Regex.swift in Sources */,
 				AB292686239E7CB5005212E2 /* CollectionExtensions.swift in Sources */,
 				2521F76625652FA300BDA4B5 /* Uninstall.swift in Sources */,
 				ABC770D922A8272B007DE9E4 /* ArgumentConvertible.swift in Sources */,
@@ -1122,6 +1295,7 @@
 				ABFE670522A6CDAB0059AE60 /* MBCommander.swift in Sources */,
 				2521F76C256531EF00BDA4B5 /* MBPluginManager+Uninstaller.swift in Sources */,
 				ABD4C5D823260B0F008D22EB /* ZipCMD.swift in Sources */,
+				AB47430E272BF78200344242 /* History.swift in Sources */,
 				AB08F60925F0C8F400CF41A8 /* MBInputHandler.swift in Sources */,
 				ABB22A22262D90B70024F725 /* ResultExtension.swift in Sources */,
 				AB29268C239E7CB5005212E2 /* URLExtensions.swift in Sources */,
@@ -1188,6 +1362,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DYLIB_CURRENT_VERSION = "$(MARKETING_VERSION)";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1256,6 +1431,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_CURRENT_VERSION = "$(MARKETING_VERSION)";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -1284,17 +1460,18 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = AE4238301B17D334BCA04057 /* Pods-MBoxCore.debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
-				DEPLOYMENT_LOCATION = YES;
-				DEPLOYMENT_POSTPROCESSING = YES;
+				DEPLOYMENT_LOCATION = "$(inherited)";
+				DEPLOYMENT_POSTPROCESSING = "$(inherited)";
 				DEVELOPMENT_TEAM = "";
-				DSTROOT = "$(PODS_PODFILE_DIR_PATH)/build";
+				DSTROOT = "$(inherited)";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = "$(inherited)";
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1302,12 +1479,16 @@
 				FRAMEWORK_VERSION = A;
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				INFOPLIST_FILE = MBoxCore/Info.plist;
-				INSTALL_PATH = "$(PROJECT_NAME)";
+				INSTALL_PATH = "$(inherited)";
 				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/MBoxCore.framework/MBoxCore";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@loader_path",
 					"@executable_path/../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/usr/lib/swift",
 				);
 				MODULEMAP_FILE = "";
 				OTHER_LDFLAGS = "$(inherited)";
@@ -1315,8 +1496,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = bytedance.MBoxCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SKIP_INSTALL = NO;
-				STRIP_INSTALLED_PRODUCT = NO;
+				SKIP_INSTALL = "$(inherited)";
+				STRIP_INSTALLED_PRODUCT = "$(inherited)";
+				SWIFT_COMPILATION_MODE = "$(inherited)";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -1325,17 +1507,18 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 58B73386C1E43DA97097E9C0 /* Pods-MBoxCore.release.xcconfig */;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
-				DEPLOYMENT_LOCATION = YES;
-				DEPLOYMENT_POSTPROCESSING = YES;
+				DEPLOYMENT_LOCATION = "$(inherited)";
+				DEPLOYMENT_POSTPROCESSING = "$(inherited)";
 				DEVELOPMENT_TEAM = "";
-				DSTROOT = "$(PODS_PODFILE_DIR_PATH)/build";
+				DSTROOT = "$(inherited)";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = "$(inherited)";
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -1343,12 +1526,16 @@
 				FRAMEWORK_VERSION = A;
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				INFOPLIST_FILE = MBoxCore/Info.plist;
-				INSTALL_PATH = "$(PROJECT_NAME)";
+				INSTALL_PATH = "$(inherited)";
 				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/MBoxCore.framework/MBoxCore";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@loader_path",
 					"@executable_path/../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/usr/lib/swift",
 				);
 				MODULEMAP_FILE = "";
 				OTHER_LDFLAGS = "$(inherited)";
@@ -1356,9 +1543,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = bytedance.MBoxCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SKIP_INSTALL = NO;
-				STRIP_INSTALLED_PRODUCT = NO;
-				SWIFT_COMPILATION_MODE = singlefile;
+				SKIP_INSTALL = "$(inherited)";
+				STRIP_INSTALLED_PRODUCT = "$(inherited)";
+				SWIFT_COMPILATION_MODE = "$(inherited)";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -1369,6 +1556,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				DEAD_CODE_STRIPPING = YES;
 				DEPLOYMENT_LOCATION = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				DSTROOT = "$(PODS_PODFILE_DIR_PATH)/build";
@@ -1394,6 +1582,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				DEAD_CODE_STRIPPING = YES;
 				DEPLOYMENT_LOCATION = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				DSTROOT = "$(PODS_PODFILE_DIR_PATH)/build";
@@ -1419,6 +1608,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				DEAD_CODE_STRIPPING = YES;
 				DEPLOYMENT_LOCATION = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				DSTROOT = "$(PODS_PODFILE_DIR_PATH)/build";
@@ -1445,6 +1635,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEPLOYMENT_LOCATION = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;

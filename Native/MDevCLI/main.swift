@@ -12,6 +12,9 @@ let args = ProcessInfo.processInfo.arguments
 var devRoot: String?
 if let index = args.firstIndex(of: "--dev-root") {
     devRoot = args[index + 1]
+} else if let arg = args.first(where: { $0.hasPrefix("--dev-root=") }),
+          let index = arg.firstIndex(of: "=") {
+    devRoot = String(arg[arg.index(index, offsetBy: 1) ..< arg.endIndex])
 } else if let path = ProcessInfo.processInfo.environment["MBOX_DEV_ROOT"] {
     devRoot = path
 } else {

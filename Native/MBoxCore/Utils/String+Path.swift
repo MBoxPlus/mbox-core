@@ -43,6 +43,7 @@ public extension String {
         let relative = !self.isAbsolutePath
         var paths = [String]()
         for path in self.split(separator: "/") {
+            if path == "." { continue }
             if path == ".." {
                 if paths.count > 0 && paths.last != ".." {
                     _ = paths.popLast()
@@ -65,6 +66,11 @@ public extension String {
 
     var isAbsolutePath: Bool {
         return (self as NSString).isAbsolutePath
+    }
+
+    func absolutePath(base: String = FileManager.pwd) -> String {
+        if self.isAbsolutePath { return self }
+        return base.appending(pathComponent: self)
     }
 
     var isExists: Bool {
@@ -97,6 +103,10 @@ public extension String {
         } catch {
             return false
         }
+    }
+
+    var realpath: String {
+        return self.destinationOfSymlink ?? self
     }
 
     var destinationOfSymlink: String? {
@@ -163,6 +173,9 @@ public extension String {
         // Build relative path
         var relComponents = Array(repeating: "..", count: baseComponents.count - i)
         relComponents.append(contentsOf: destComponents[i...])
+        if relComponents.isEmpty {
+            return "."
+        }
         return relComponents.joined(separator: "/")
     }
 

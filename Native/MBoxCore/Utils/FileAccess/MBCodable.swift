@@ -163,6 +163,7 @@ extension String: MBCodable {
         return "\(object)"
     }
 }
+extension NSString: MBCodable {}
 extension NSNumber: MBCodable {}
 extension Int: MBCodable {}
 extension Bool: MBCodable {}
@@ -205,18 +206,28 @@ extension Array: MBCodable where Element: MBCodable {
 typealias OptionalAny = Optional<Any>
 extension Dictionary: MBCodable {
     public func toCodableObject() -> Any? {
-        return self.mapValues({ value -> Any? in
-            if case let OptionalAny.some(obj) = (value as Any) {
-                if let obj = obj as? MBCodable {
-                    return obj.toCodableObject()
-                } else if let dict = value as? [String: Any] {
-                    return dict.toCodableObject()
-                }
-                return value
+        return self.compactMapKeysAndValues { (key: Hashable, value: Any?) -> (String, Any?)? in
+            let vKey: String
+            if let key = key as? MBCodable {
+               if let key2 = key.toCodableObject() as? String {
+                   vKey = key2
+               } else {
+                   return nil
+               }
             } else {
                 return nil
             }
-        })
+            if case let OptionalAny.some(obj) = (value as Any) {
+                if let obj = obj as? MBCodable {
+                    return (vKey, obj.toCodableObject())
+                } else if let dict = value as? [String: Any] {
+                    return (vKey, dict.toCodableObject())
+                }
+                return (vKey, value)
+            } else {
+                return nil
+            }
+        }
     }
 
     public static func load(fromObject object: Any) throws -> Self {
@@ -227,7 +238,7 @@ extension Dictionary: MBCodable {
         guard let dict = object as? [AnyHashable: Any] else {
             throw NSError(domain: "Convert Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "Type mismatch \(self): \(object)"])
         }
-        return try Dictionary(uniqueKeysWithValues: dict.map { key, value in
+        return try Dictionary(dict.map { key, value in
             try (k.load(fromObject: key), v.load(fromObject: value)) as! (Key, Value)
         })
     }

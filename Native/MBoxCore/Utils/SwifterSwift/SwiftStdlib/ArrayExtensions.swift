@@ -35,6 +35,17 @@ public extension Array {
     }
 }
 
+public extension Array {
+    @discardableResult
+    mutating func remove(at: [Int]) -> [Element] {
+        var items: [Element] = []
+        for (index, value) in at.enumerated() {
+            items.append(remove(at: value - index))
+        }
+        return items
+    }
+}
+
 // MARK: - Methods (Equatable)
 public extension Array where Element: Equatable {
 

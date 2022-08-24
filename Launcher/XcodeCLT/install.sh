@@ -15,7 +15,7 @@ if [[ "$_xcode_path" != *"Xcode"* ]] || [ ! -d "$_xcode_path" ]; then
     if [[ "${_xcode_path}" == "" ]]; then
         echo "[WARN] Could not find Xcode."
     else
-        mbox_sudo_exec "Setting Command Line Tools to '${_xcode_path}', Password:" "xcode-select -s '${_xcode_path}'"
+        mbox_sudo_exec "Setting Command Line Tools to '${_xcode_path}', Password:" xcode-select -s "${_xcode_path}"
     fi
 fi
 
@@ -25,7 +25,7 @@ if [[ "$_xcode_path" == *"Xcode"* ]]; then
     if mbox_check_exist xcodebuild; then
         mbox_exec xcodebuild -checkFirstLaunchStatus
         if [[ $? != 0 ]]; then
-            mbox_sudo_exe "Installing Xcode Command Line Tools, Password:" "xcodebuild -runFirstLaunch"
+            mbox_sudo_exe "Please input the root password to agree the software license agreements from Xcode:" xcodebuild -runFirstLaunch accept
         fi
     fi
 fi

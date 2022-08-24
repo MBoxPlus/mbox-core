@@ -8,47 +8,18 @@
 
 import Foundation
 
-extension String {
-    public func match(_ regex: String) throws -> [[String]]? {
-        let regex = try NSRegularExpression(pattern: regex, options: [])
-        let nsString = self as NSString
-        let results  = regex.matches(in: self, options: [], range: NSMakeRange(0, nsString.length))
-        if results.count == 0 {
-            return nil
-        }
-        return results.map { result in
-            (0..<result.numberOfRanges).map {
-                result.range(at: $0).location != NSNotFound
-                    ? nsString.substring(with: result.range(at: $0))
-                    : ""
-            }
-        }
-    }
-
-    public func isMatch(_ regex: String) -> Bool {
-        return self.range(of: regex, options: .regularExpression) != nil
-    }
-}
-infix operator =~
-public func =~(string:String, regex:String) -> Bool {
-    return string.isMatch(regex)
-}
-infix operator !~
-public func !~(string:String, regex:String) -> Bool {
-    return !string.isMatch(regex)
-}
-
 public struct MBGitURL: Equatable, CustomStringConvertible {
     public init?(_ git: __shared String) {
-        guard let matchData = try? git.match("^((.*):\\/\\/)?((.*)@)?(.*?)[:|\\/](.*)\\/(.*?)(.git)?$")?.first else {
+        guard let matchData = try? git.match(regex: "^((.*):\\/\\/)?((.*)@)?(.*?)(:(\\d+))?[:|\\/](.*)\\/(.*?)(.git)?$")?.first else {
             return nil
         }
         url = git
         scheme = matchData[2]
         user = matchData[4]
         host = matchData[5]
-        groups = matchData[6].split(separator: "/").map { String($0) }
-        project = matchData[7]
+        port = matchData[7]
+        groups = matchData[8].split(separator: "/").map { String($0) }
+        project = matchData[9]
 
         if user.isEmpty {
             user = "git"
@@ -58,6 +29,7 @@ public struct MBGitURL: Equatable, CustomStringConvertible {
     public private(set) var url: String
     public private(set) var scheme: String
     public private(set) var host: String
+    public private(set) var port: String
     public private(set) var user: String
     public private(set) var groups: [String]
     public private(set) var project: String
@@ -71,11 +43,31 @@ public struct MBGitURL: Equatable, CustomStringConvertible {
     }
 
     public func toGitStyle() -> String {
-        return "\(user)@\(host):\(group)/\(project).git"
+        var url = ""
+        if !self.scheme.isEmpty, self.scheme.lowercased() != "https" {
+            url.append(self.scheme + "://")
+        }
+        url.append("\(user)@\(host):")
+        if !self.port.isEmpty  {
+            url.append("\(port)/")
+        }
+        url.append("\(group)/\(project).git")
+        return url
     }
 
     public func toHTTPStyle() -> String {
-        return "https://\(host)/\(group)/\(project).git"
+        var url = "https://"
+        if self.user != "git" {
+            url.append(self.user + "@")
+        }
+        url.append(host)
+        if self.port.isEmpty {
+            url.append("/")
+        } else {
+            url.append(":\(port)/")
+        }
+        url.append("\(group)/\(project).git")
+        return url
     }
 
     public var description: String {

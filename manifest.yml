@@ -1,4 +1,3 @@
-ALIAS: 
 DEPENDENCIES: []
 NAME: MBoxCore
 VERSION: '2.2'
@@ -9,3 +8,6 @@ USER_VISIBLE: false
 MINIMUM_VERSION: '4.8.0'
 AUTHORS:
 - MBox Team
+LAUNCHERS:
+- MBoxCore/XcodeCLT
+- MBoxCore/MBox

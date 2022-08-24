@@ -64,7 +64,13 @@ public class MBYAMLCoder: MBCoder {
     }
 
     public override func encode(object: Any, sortedKeys: Bool, prettyPrinted: Bool) -> String {
-        return (try? Yams.dump(object: object, sortKeys: sortedKeys)) ?? ""
+        let string = (try? Yams.dump(object: object, sortKeys: sortedKeys)) ?? ""
+        return string.replace(regex: "\\\\u([0-9A-F]{4})") { match in
+            let groupRange = match.range(at: 1)
+            let groupString = string[groupRange]
+            let code = UInt32(groupString, radix: 16)!
+            return "\(UnicodeScalar(code)!)"
+        }
     }
 }
 

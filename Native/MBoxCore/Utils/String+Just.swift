@@ -31,6 +31,12 @@ extension String {
         let rightPadded = self.padding(toLength:max(count, length), withPad:pad, startingAt:0)
         return "".padding(toLength:length, withPad:rightPadded, startingAt:(length+count)/2 % length)
     }
+    public func trailingTrim(_ characterSet: CharacterSet = .whitespaces) -> String {
+        if let range = rangeOfCharacter(from: characterSet, options: [.anchored, .backwards]) {
+            return String(self[..<range.lowerBound]).trailingTrim(characterSet)
+        }
+        return self
+    }
 }
 
 public class Row {
@@ -50,7 +56,7 @@ public class Row {
         self.columns = columns
     }
     public var description: [String] {
-        var v = [text]
+        var v = [text.trailingTrim()]
         if let sub = subRows?.flatMap(\.description) {
             v.append(contentsOf: sub)
         }

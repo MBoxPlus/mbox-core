@@ -52,7 +52,7 @@ extension MBCommander {
         open override func run() throws {
             try super.run()
             if self.showLog {
-                guard let dir = UI.logger.verbFilePath?.deletingLastPathComponent else {
+                guard let dir = UI.logger.filePath?.deletingLastPathComponent else {
                     throw RuntimeError("Log file not exists!")
                 }
                 self.paths = [dir]
