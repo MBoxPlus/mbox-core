@@ -15,6 +15,10 @@ public enum FileExistence: Equatable {
 }
 
 public extension String {
+    var fileName: String {
+        return (self as NSString).lastPathComponent.deletingPathExtension
+    }
+
     func appending(pathComponent: String) -> String {
         return (self as NSString).appendingPathComponent(pathComponent)
     }
@@ -37,6 +41,10 @@ public extension String {
 
     var expandingTildeInPath: String {
         return (self as NSString).expandingTildeInPath
+    }
+
+    var abbreviatingWithTildeInPath: String {
+        return (self as NSString).abbreviatingWithTildeInPath
     }
 
     var cleanPath: String {

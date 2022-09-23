@@ -86,7 +86,7 @@ public class MBPluginModule: MBCodableObject, MBYAMLProtocol {
         module.filePath = filePath
         module.superModule = self
         module.package = self.package
-        _modules.append(name)
+        _modules.append(String(name.split(separator: "/").last!))
         self.modules.append(module)
         return module
     }

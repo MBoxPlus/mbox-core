@@ -7,6 +7,7 @@
 //
 
 import Foundation
+@_exported import SwifterSwift
 
 var run = false
 
@@ -30,6 +31,7 @@ open class MBoxCore: NSObject, MBPluginProtocol {
         MBCommanderGroup.shared.addCommand(MBCommander.Plugin.Uninstall.self)
         MBCommanderGroup.shared.addCommand(MBCommander.Plugin.Enable.self)
         MBCommanderGroup.shared.addCommand(MBCommander.Plugin.Disable.self)
+        MBCommanderGroup.shared.addCommand(MBCommander.Plugin.Info.self)
         MBCommanderGroup.shared.addCommand(MBCommander.Open.self)
         MBCommanderGroup.shared.addCommand(MBCommander.Config.self)
         MBCommanderGroup.shared.addCommand(MBCommander.Doc.self)
@@ -50,6 +52,11 @@ open class MBoxCore: NSObject, MBPluginProtocol {
         }
 
         return info
+    }
+
+    dynamic
+    public static var isBeta: Bool {
+        return self.bundle.shortVersion.rangeOfCharacter(from: NSCharacterSet.letters) != nil
     }
 
     public static var latestVersion: String? = MBoxCore.queryLatestVersion()

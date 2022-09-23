@@ -21,6 +21,7 @@ mbox_printf_title() {
     CYAN='\033[0;36m'
     NC='\033[0m' # No Color
     printf "\n${CYAN}$@...${NC}"
+    export SUDO_PROMPT=$@
 }
 
 mbox_print_error() {
@@ -283,6 +284,18 @@ mbox_set_environment() {
       sed -i '' "s=^[#]*\s*${thekey}\=.*=${thekey}\=${newvalue}=" $filename
     fi
     export $thekey=$newvalue
+}
+
+mbox_export_enironment() {
+    local path="${MBOX_ENVIRONMENT_FILE}"
+    if [[ -z "${path}" ]]; then
+        return
+    fi
+
+    local key="$1"
+    local value="$2"
+
+    echo "${key}=${value}" >> "${path}"
 }
 
 vercomp() {

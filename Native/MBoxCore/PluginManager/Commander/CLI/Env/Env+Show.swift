@@ -9,10 +9,6 @@
 import Foundation
 
 extension MBCommander.Env {
-    dynamic
-    public func instance(for section: MBCommanderEnv.Type) -> MBCommanderEnv {
-        return section.init()
-    }
 
     // MARK: - API
     public func showAPI(_ sections: [MBCommanderEnv.Type]) throws {
@@ -44,7 +40,7 @@ extension MBCommander.Env {
             UI.log(info: "[\(title)]:")
         }
 
-        for i in formatTable(rows) {
+        for i in formatTable(rows, indent: section.indent ? 4 : 0) {
             UI.log(info: i)
         }
     }

@@ -2,6 +2,8 @@ PODS:
   - Alamofire (4.8.2)
   - BlueSignals (1.0.21)
   - ObjCCommandLine (0.0.5)
+  - SwifterSwift/Foundation (5.2.0)
+  - SwifterSwift/SwiftStdlib (5.2.0)
   - Then (2.6.0)
   - Yams (4.0.3)
 
@@ -9,6 +11,8 @@ DEPENDENCIES:
   - Alamofire (~> 4.8.2)
   - BlueSignals (~> 1.0.20)
   - ObjCCommandLine
+  - SwifterSwift/Foundation
+  - SwifterSwift/SwiftStdlib
   - Then (~> 2.6.0)
   - Yams (~> 4.0)
 
@@ -17,6 +21,7 @@ SPEC REPOS:
     - Alamofire
     - BlueSignals
     - ObjCCommandLine
+    - SwifterSwift
     - Then
     - Yams
 
@@ -24,6 +29,7 @@ SPEC CHECKSUMS:
   Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
   BlueSignals: a18937bb79a865022c85210b94a24cf270b4ea10
   ObjCCommandLine: 05f4f42312ee2e928b719312fb0e4287f9c9e574
+  SwifterSwift: 334181863c416882d97b7a60c05054d9e4d799e2
   Then: 90cd104fd951cec1980a03f57704ad8f784d4d79
   Yams: 3d608cd9c8c0fbc1befafe6a2b9a6c6db5e325d5
 

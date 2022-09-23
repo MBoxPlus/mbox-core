@@ -21,4 +21,13 @@ public extension Array {
         }
         return nil
     }
+
+    @discardableResult
+    mutating func remove(at: [Int]) -> [Element] {
+        var items: [Element] = []
+        for (index, value) in at.enumerated() {
+            items.append(remove(at: value - index))
+        }
+        return items
+    }
 }

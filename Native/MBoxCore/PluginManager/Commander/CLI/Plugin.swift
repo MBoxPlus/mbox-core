@@ -15,6 +15,11 @@ extension MBCommander {
             return "Manage Plugins"
         }
 
+        open override func setup() throws {
+            try super.setup()
+            MBProcess.shared.requireSetupLauncher = false
+        }
+
         open override func run() throws {
             try super.run()
             if type(of: self) == MBCommander.Plugin.self {

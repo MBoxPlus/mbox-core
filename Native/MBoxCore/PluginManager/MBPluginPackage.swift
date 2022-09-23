@@ -46,6 +46,9 @@ public final class MBPluginPackage: MBPluginModule {
     @Codable(key: "SWIFT_VERSION")
     public var swiftVersion: String?
 
+    @Codable(key: "AUTO_ACTIVATE")
+    public var autoActivate: Bool = false
+
     public override func bindProperties() {
         super.bindProperties()
         self.package = self

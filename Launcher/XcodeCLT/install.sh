@@ -14,12 +14,11 @@ if [[ "$_xcode_path" != *"Xcode"* ]] || [ ! -d "$_xcode_path" ]; then
     _xcode_path=$(mbox_get_app_path 'com.apple.dt.Xcode')
     if [[ "${_xcode_path}" == "" ]]; then
         echo "[WARN] Could not find Xcode."
+        mbox_exec xcode-select --install
     else
         mbox_sudo_exec "Setting Command Line Tools to '${_xcode_path}', Password:" xcode-select -s "${_xcode_path}"
     fi
 fi
-
-mbox_exec xcode-select --install
 
 if [[ "$_xcode_path" == *"Xcode"* ]]; then
     if mbox_check_exist xcodebuild; then

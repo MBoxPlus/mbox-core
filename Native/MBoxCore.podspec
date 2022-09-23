@@ -32,4 +32,6 @@ Pod::Spec.new do |spec|
   spec.dependency 'BlueSignals', '~> 1.0.20'
   spec.dependency 'Then', '~> 2.6.0'
   spec.dependency 'ObjCCommandLine'
+  spec.dependency 'SwifterSwift/SwiftStdlib'
+  spec.dependency 'SwifterSwift/Foundation'
 end

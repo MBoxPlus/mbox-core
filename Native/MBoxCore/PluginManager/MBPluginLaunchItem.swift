@@ -42,12 +42,23 @@ public final class MBPluginLaunchItem: MBCodableObject {
     }
 
     public func runLauncherScript(_ scriptPath: String) -> Int32 {
+        let envFile = FileManager.temporaryPath("launcher_environment.config", scope: "Core")
         let cmd = MBCMD()
         cmd.showOutput = true
         cmd.workingDirectory = scriptPath.deletingLastPathComponent
         cmd.env["MBOX_CORE_LAUNCHER"] = MBoxCore.pluginPackage!.launcherDir
         cmd.env["MBOX_PLUGIN_PATH"] = self.plugin.path
         cmd.env["MBOX_PLUGIN_NAME"] = self.pluginName
+        cmd.env["MBOX_ENVIRONMENT_FILE"] = envFile
+        defer {
+            if envFile.isFile,
+               let content = try? String(contentsOfFile: envFile),
+               let map = try? MBConfCoder.shared.decode(string: content) as? [String: String] {
+                for (key, value) in map {
+                    MBProcess.shared.environment[key] = value
+                }
+            }
+        }
         return cmd.exec("sh ./\(scriptPath.lastPathComponent.quoted)")
     }
 

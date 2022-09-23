@@ -77,9 +77,35 @@ extension MBPluginManager {
         return success
     }
 
+    public func autoActivate() {
+        let allPackages = self.allPackages
+        try? UI.logLoad("Activate Auto-Activate Plugins") {
+            var changed = false
+            let history = MBPluginModule.History.shared
+            for package in allPackages {
+                guard package.autoActivate else {
+                    continue
+                }
+                let requireInstall = package.allModules
+                    .compactMap{ history.status(for: $0).status }
+                    .contains { $0 == .requireInstall }
+                guard requireInstall else {
+                    continue
+                }
+                UI.logLoad("Activate \(package.name)")
+                let result = try MBSetting.global.addPlugin(package.name)
+                changed = changed || result
+            }
+            if changed {
+                MBSetting.global.save()
+            }
+        }
+    }
+
     public func loadAll() {
-        let allModules = self.allModules
+        self.autoActivate()
         UI.logLoad("Load Modules:") {
+            let allModules = self.allModules
             var loadedModules = Set<MBPluginModule>()
             var failedModules = Set<MBPluginModule>()
 

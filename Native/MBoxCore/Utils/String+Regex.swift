@@ -33,7 +33,7 @@ extension String {
         let regex = try! NSRegularExpression(pattern: regex, options: [])
         var value = ""
         var lastPointer = 0
-        regex.enumerateMatches(in: self, options: [], range: NSMakeRange(0, self.lengthOfBytes(using: .utf8))) { result, _, _ in
+        regex.enumerateMatches(in: self, options: [], range: NSMakeRange(0, self.count)) { result, _, _ in
             guard let result = result else { return }
             if result.range.lowerBound > lastPointer {
                 value.append(nsString.substring(with: NSMakeRange(lastPointer, result.range.lowerBound - lastPointer)))

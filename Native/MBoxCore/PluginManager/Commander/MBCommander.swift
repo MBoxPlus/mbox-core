@@ -264,13 +264,17 @@ open class MBCommander: NSObject {
             try UI.logger.with(pip: .ERR) {
                 try setupLauncher()
             }
-            try validate()
-            try? self.preRun()
-            defer {
-                try? self.postRun()
-            }
-            try performRun()
+            try performValidateAndRun()
         }
+    }
+
+    func performValidateAndRun() throws {
+        try validate()
+        try? self.preRun()
+        defer {
+            try? self.postRun()
+        }
+        try performRun()
     }
 
     dynamic
@@ -344,7 +348,7 @@ open class MBCommander: NSObject {
 
     open func invoke(_ cmd: MBCommander.Type, argv: ArgumentParser? = nil) throws {
         let other = try cmd.init(argv: argv ?? self.argv, command: self)
-        try other.performRun()
+        try other.performValidateAndRun()
     }
 
     @discardableResult

@@ -6,18 +6,17 @@ MBoxCore is the core of MBox CLT built in MBox APP, which provides the basic mod
 
 - `MBoxCLI` - the executable file of command line.
 - `MDevCLI` - the executable file of command line for debug.
-- `repackage-dylibs.rb` - the script for packaging dylibs.
 
 ## Classes
 
-- `MBSession` - The instance created when each command line process started.
+- `MBThread` - The instance created when each command line thread started.
 - `MBCommander` - The base class of each specific command.
 - `MBCMD` - The class of each executable command.
-- `MBPluginManager` - The shared instance, which manages all MBox Plugins, including installing, upgrading, launching and loading.
 - `MBLogger` - Class of logger for command line.
-
 - `MBSetting` - The model class for `.mboxconfig` files.
+- `MBPluginManager` - The shared instance, which manages all MBox Plugins, including installing, upgrading, launching and loading.
 - `MBPluginPackage` - The model class for each MBox plugin.
+- `MBPluginModule` - The model class for each MBox module in a plugin.
 
 
 ## Contributing

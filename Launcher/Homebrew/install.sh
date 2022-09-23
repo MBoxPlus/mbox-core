@@ -12,9 +12,15 @@ if [[ $? != 0 ]]; then
         exit 1
     fi
     if [[ $(uname -p) == 'arm' ]]; then
-      # ARM device
-      echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.profile
-      eval "$(/opt/homebrew/bin/brew shellenv)"
+        # ARM device
+        echo '
+if [[ "${HOMEBREW_PREFIX}" != "/opt/homebrew" ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+' >> ~/.profile
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    else
+        eval "$(/usr/local/bin/brew shellenv)"
     fi
 fi
 
@@ -23,3 +29,15 @@ check_brew_version
 if [[ $? != 0 ]]; then
     mbox_exe brew update
 fi
+
+var=(
+  'HOMEBREW_PREFIX'
+  'HOMEBREW_CELLAR'
+  'HOMEBREW_REPOSITORY'
+  'PATH'
+  'MANPATH'
+  'INFOPATH')
+
+for name in ${var[@]}; do
+    mbox_export_enironment "${name}" "${!name}"
+done

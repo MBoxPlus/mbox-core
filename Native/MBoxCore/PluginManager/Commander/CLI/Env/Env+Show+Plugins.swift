@@ -28,19 +28,30 @@ extension MBCommander.Env {
             return "plugins"
         }
 
+        public static var showTitle: Bool = true
+        public static var indent: Bool = true
+
         required public init() {
+            self.packages = MBPluginManager.shared.packages
         }
-    
+
+        required public init(packages: [MBPluginPackage]) {
+            self.packages = packages
+        }
+
+        public var packages: [MBPluginPackage]
+
         public func APIData() throws -> Any?  {
-            return MBPluginManager.shared.packages.map { $0.toAPIObject() }
+            return self.packages.map { $0.toAPIObject() }
         }
 
         public func plainData() throws -> [String]? {
-            return MBPluginManager.shared.packages.sorted(by: \.name).map { $0.path }
+            return self.packages.sorted(by: \.name).map { $0.path }
         }
 
         public func textRows() throws -> [Row]? {
             return MBPluginManager.shared.modulesHash
+                .filter { self.packages.contains($0.key) }
                 .sorted(by: \.key)
                 .flatMap { (package, modules) in
                     package.packageDetailDescription(for: modules.sorted(by: \.name))

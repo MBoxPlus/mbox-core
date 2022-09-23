@@ -54,7 +54,7 @@ extension MBThread {
 
 extension MBThread {
 
-    public func gets(prompt: String,
+    private func gets(prompt: String,
                      hint: ((String) -> String?)? = nil) throws -> String {
         let ln = LineNoise(terminal: self.terminal!)
         guard ln.mode == .supportedTTY else {
@@ -73,8 +73,18 @@ extension MBThread {
         return input
     }
 
+
+    public func gets(_ message: String) throws -> String {
+        while true {
+            let value = try gets(prompt: message).trimmed
+            if value.count > 0 {
+                return value
+            }
+        }
+    }
+
     public func gets(_ message: String,
-                     default: String? = nil,
+                     default: String?,
                      items: [String] = [],
                      hint: ((String) -> String?)? = nil) throws -> String {
         let mappedItems = items.map { (name: $0, value: $0) }
@@ -149,11 +159,11 @@ extension MBThread {
             defaultValue = nil
         }
         while true {
-            let value = try gets(message, default: defaultValue, items: items)
-            switch value {
-            case "yes": return true
-            case "no": return false
-            default: break
+            let value = try gets(message, default: defaultValue, items: items).lowercased()
+            if value.hasPrefix("y") {
+                return true
+            } else if value.hasPrefix("n") {
+                return false
             }
         }
     }

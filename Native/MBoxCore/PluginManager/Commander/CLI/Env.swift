@@ -12,6 +12,7 @@ public protocol MBCommanderEnv {
     static var supportedAPI: [MBCommander.Env.APIType] { get }
     static var title: String { get }
     static var showTitle: Bool { get }
+    static var indent: Bool { get }
 
     init()
 
@@ -23,6 +24,7 @@ public protocol MBCommanderEnv {
 
 extension MBCommanderEnv {
     public static var showTitle: Bool { return true }
+    public static var indent: Bool { return true }
     public func textRow() throws -> Row? { return nil }
     public func textRows() throws -> [Row]? { return nil }
     public func APIData() throws -> Any?  { return nil }
@@ -52,6 +54,18 @@ extension MBCommander {
         open override func setup() throws {
             self.only = (self.shiftOptions("only") ?? ["all"]).map { $0.lowercased() }
             try super.setup()
+        }
+
+        open var only: [String] = ["all"]
+        open var sections: [MBCommanderEnv.Type] = []
+
+        open override func validate() throws {
+            try super.validate()
+            if MBProcess.shared.apiFormatter == .plain {
+                if self.sections.count > 1 {
+                    throw ArgumentError.conflict("It is not allowed with multiple sections when using `--api=plain`.")
+                }
+            }
             var sections = [MBCommanderEnv.Type]()
             let allSections = Self.sections
             for only in self.only {
@@ -64,18 +78,6 @@ extension MBCommander {
             for section in sections {
                 if !self.sections.contains(where: { $0 == section }) {
                     self.sections.append(section)
-                }
-            }
-        }
-
-        open var only: [String] = ["all"]
-        open var sections: [MBCommanderEnv.Type] = []
-
-        open override func validate() throws {
-            try super.validate()
-            if MBProcess.shared.apiFormatter == .plain {
-                if self.sections.count > 1 {
-                    throw ArgumentError.conflict("It is not allowed with multiple sections when using `--api=plain`.")
                 }
             }
         }
@@ -113,6 +115,11 @@ extension MBCommander {
             return self.allSections.filter {
                 $0.supportedAPI.contains(apiType)
             }
+        }
+
+        dynamic
+        public func instance(for section: MBCommanderEnv.Type) -> MBCommanderEnv {
+            return section.init()
         }
     }
 }
