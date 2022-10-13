@@ -1,2 +1,0 @@
-${TARGET_BUILD_DIR}/${PROJECT_NAME}.podspec.json
-${TARGET_BUILD_DIR}/setting.schema.json
