@@ -10,7 +10,7 @@ import Foundation
 
 extension String {
     public var quoted: String {
-        if self.contains(" ") && !self.isMatch("^['\"].*['\"]$") {
+        if self.contains(" ") && (self !~ "^['\"].*['\"]$") {
             return "'\(self)'"
         }
         if self.contains("&") {

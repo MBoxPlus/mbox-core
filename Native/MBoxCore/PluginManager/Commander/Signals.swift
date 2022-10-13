@@ -2,7 +2,7 @@
 //  Signals.swift
 //  MBoxCore
 //
-//  Created by 詹迟晶 on 2020/6/9.
+//  Created by Whirlwind on 2020/6/9.
 //  Copyright © 2020 bytedance. All rights reserved.
 //
 
@@ -51,7 +51,7 @@ public func performSignal(_ signal: Int32) {
     exitSignal = signal
     DispatchQueue.global().async {
         while !UI.runningCMDs.isEmpty {
-            sleep(1)
+            usleep(useconds_t(0.3 * 1000000))
         }
         for action in actions.reversed() {
             action(signal)

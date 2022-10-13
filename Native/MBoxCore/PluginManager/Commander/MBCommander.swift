@@ -51,11 +51,16 @@ open class MBCommander: NSObject {
         return nil
     }
 
+    open class var example: String? {
+        return nil
+    }
+
     dynamic
     open class var options: [Option] {
         return [
-            Option("api", description: "Output information with API format.", values: MBLoggerAPIFormatter.allCases.map { $0.rawValue }),
+            Option("api", description: "Output information with API format.", values: MBLoggerAPIFormatter.allCases.map { $0.rawValue }.sorted()),
             Option("root", description: "Set Root Directory"),
+            Option("home", description: "Set Configuration Home Directory"),
         ]
     }
 
@@ -105,7 +110,7 @@ open class MBCommander: NSObject {
         return commands.map { $0.joined(separator: ":") }
     }
 
-    // MARK: - 内部方法
+    // MARK: - Private methods to override
     open var argv: ArgumentParser!
 
     public override convenience init() {
@@ -124,11 +129,11 @@ open class MBCommander: NSObject {
 
     dynamic
     open func setup() throws {
-        if self.requireSetupLauncher {
+        if MBProcess.shared.requireSetupLauncher {
             if type(of: self) == MBCommander.self {
-                self.requireSetupLauncher = false
+                MBProcess.shared.requireSetupLauncher = false
             } else {
-                self.requireSetupLauncher = self.shiftFlag("launcher", default: true)
+                MBProcess.shared.requireSetupLauncher = self.shiftFlag("launcher", default: true)
             }
         }
     }
@@ -136,11 +141,8 @@ open class MBCommander: NSObject {
     dynamic
     open func setup(argv: ArgumentParser) throws {
         self.argv = argv
-        if self.hasOption("api") {
-            UI.apiFormatter = self.shiftOption("api", default: MBLoggerAPIFormatter.json)
-        }
         if self.shiftFlag("help") {
-            UI.showHelp = true
+            MBProcess.shared.showHelp = true
             try help()
         }
         try setup()
@@ -168,7 +170,7 @@ open class MBCommander: NSObject {
 
     open func shiftArguments(_ name: String) -> [String] {
         guard let argument = self.allArguments[name] as? Argument else {
-            assertionFailure("在 arguments 类方法中未声明有该参数")
+            assertionFailure("The parameter is not declared in the class method `arguments`: \(name)")
             return []
         }
         do {
@@ -257,20 +259,41 @@ open class MBCommander: NSObject {
         return `default`
     }
 
-    dynamic
-    open func performAction() throws {
+    func performAction() throws {
         try autoreleasepool {
-            try UI.with(pip: .ERR) {
+            try UI.logger.with(pip: .ERR) {
                 try setupLauncher()
             }
-            try validate()
-            try performRun()
+            try performValidateAndRun()
         }
+    }
+
+    func performValidateAndRun() throws {
+        try validate()
+        try? self.preRun()
+        defer {
+            try? self.postRun()
+        }
+        try performRun()
     }
 
     dynamic
     open func performRun() throws {
         try run()
+    }
+
+    dynamic
+    open func preRun() throws {
+        for hook in UI.preRunHooks {
+            hook()
+        }
+    }
+
+    dynamic
+    open func postRun() throws {
+        for hook in UI.postRunHooks {
+            hook()
+        }
     }
 
     dynamic
@@ -294,34 +317,29 @@ open class MBCommander: NSObject {
         }
     }
 
-    open lazy var requireSetupLauncher = true
-    open lazy var launcherPlugins = UI.activedPlugins
-
     dynamic
     open func setupLauncher(force: Bool = false) throws {
-        if force || requireSetupLauncher {
-            try UI.with(pip: .ERR) {
-                try setupLauncher(plugins: self.launcherPlugins)
+        if force || MBProcess.shared.requireSetupLauncher {
+            let items = MBPluginManager.shared.requireInstallLaunchers(for: Array(MBPluginManager.shared.modules))
+            if items.isEmpty { return }
+            try UI.logger.with(pip: .ERR) {
+                try setupLauncher(items: items)
             }
         }
     }
 
-    open func setupLauncher(plugins: [MBPluginPackage]) throws {
-        let plugins = MBPluginManager.shared.requireInstallLauncher(for: plugins)
-        if !plugins.isEmpty {
-            try UI.section("Setup Environment") {
-                try self.invoke(Plugin.Launch.self, argv: ArgumentParser(arguments: plugins.map { $0.name }))
-            }
+    open func setupLauncher(items: [MBPluginLaunchItem]) throws {
+        try UI.section("Setup Environment") {
+            try self.invoke(Plugin.Launch.self, argv: ArgumentParser(arguments: items.map { $0.fullName }))
         }
     }
-
 
     open var allowRemainderArgs: Bool {
         return false
     }
 
     open func help(_ desc: String? = nil) throws {
-        throw ArgumentError.invalidCommand(desc)
+        throw ArgumentError.help(desc)
     }
     
     open func hookfile(_ desc: String? = nil) throws {
@@ -330,30 +348,11 @@ open class MBCommander: NSObject {
 
     open func invoke(_ cmd: MBCommander.Type, argv: ArgumentParser? = nil) throws {
         let other = try cmd.init(argv: argv ?? self.argv, command: self)
-        try other.performAction()
-    }
-
-    @discardableResult
-    open func open(path: String, withApplication appName: String? = nil) -> Bool {
-        let info: String
-        if let app = appName, !app.isEmpty {
-            info = "\(app) open `\(path)`"
-        } else {
-            info = "Open `\(path)`"
-        }
-        UI.log(info: info)
-        return ExternalApp(name: appName).open(file: path)
+        try other.performValidateAndRun()
     }
 
     @discardableResult
     open func open(url: URL, withApplication appName: String? = nil) -> Bool {
-        let info: String
-        if let app = appName, !app.isEmpty {
-            info = "\(app) open `\(url)`"
-        } else {
-            info = "Open `\(url)`"
-        }
-        UI.log(info: info)
         return ExternalApp(name: appName).open(url: url)
     }
 
@@ -362,7 +361,7 @@ open class MBCommander: NSObject {
     open class var preScriptFileName: String {
         return "pre_\(fullName.replacingOccurrences(of: ".", with: "_"))"
     }
-    
+
     dynamic
     open class var postScriptFileName: String {
         return "post_\(fullName.replacingOccurrences(of: ".", with: "_"))"

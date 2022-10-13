@@ -49,16 +49,15 @@ extension URLConvertible {
                 request.httpMethod = method.rawValue
                 request.allHTTPHeaderFields = headers
                 let encodedURLRequest = try! encoding.encode(request, with: parameters)
+                UI.log(verbose: "HTTP \(method.rawValue): \(encodedURLRequest.description)")
                 if cachePolicy == .useProtocolCachePolicy {
                     if let rsp = MBURLCache.sharedCache.cachedResponse(for: encodedURLRequest), let httpResponse = rsp.response as? HTTPURLResponse {
-                        UI.log(verbose: "Found HTTP Cache. Request=[\(encodedURLRequest.description)], ResponseDate=[\(httpResponse.allHeaderFields["Date"] ?? "")].")
                         if !self.isDataExpired(requestHeaders: headers, response: httpResponse) {
                             let result = Request.serializeResponseJSON(options: .allowFragments, response: rsp.response as? HTTPURLResponse, data: rsp.data, error: nil)
                             responseData = DataResponse<Any>(request: encodedURLRequest, response: httpResponse, data: rsp.data, result: result)
                             dispatchGroup.leave()
+                            UI.log(verbose: "Found HTTP Cache. Request=[\(encodedURLRequest.description)], ResponseDate=[\(httpResponse.allHeaderFields["Date"] ?? "")].")
                             return
-                        } else {
-                            UI.log(verbose: "Cached Data Expired. Request=[\(encodedURLRequest.description)] .")
                         }
                     }
                 }
@@ -71,7 +70,7 @@ extension URLConvertible {
                         // Wait for URLCache store cache asynchronously
                         if let httpResponse = response.response, let data = response.data, httpResponse.statusCode == 200 {
                             DispatchQueue.global().async {
-                                UI.log(verbose: "Save response to cache. Request URL=[\(httpResponse.url?.description ?? "")].")
+                                // UI.log(verbose: "Save response to cache. Request URL=[\(httpResponse.url?.description ?? "")].")
                                 MBURLCache.sharedCache.storeCachedResponse(CachedURLResponse(response: httpResponse, data: data), for: encodedURLRequest)
                             }
                         }

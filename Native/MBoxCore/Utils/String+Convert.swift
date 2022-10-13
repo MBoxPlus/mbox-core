@@ -32,18 +32,18 @@ extension String {
         if (self.count == 0) { return self }
         var string = self
         var value = ""
-        var lastIsUpper = true
+        var lastIsKeyword = true
         while string.count > 0 {
             let first = string.removeFirst()
             if first.isUppercase {
-                if !lastIsUpper {
+                if !lastIsKeyword {
                     value.append("-")
                 }
                 value.append(String(first).lowercased())
             } else {
                 value.append(first)
             }
-            lastIsUpper = first.isUppercase
+            lastIsKeyword = first.isUppercase || first == "-"
         }
         return value
     }
@@ -52,18 +52,18 @@ extension String {
         if (self.count == 0) { return self }
         var string = self
         var value = ""
-        var lastIsUpper = true
+        var lastIsKeyword = true
         while string.count > 0 {
             let first = string.removeFirst()
             if first.isUppercase {
-                if !lastIsUpper {
+                if !lastIsKeyword {
                     value.append("_")
                 }
                 value.append(String(first).lowercased())
             } else {
                 value.append(first)
             }
-            lastIsUpper = first.isUppercase
+            lastIsKeyword = first.isUppercase || first == "_"
         }
         return value
     }

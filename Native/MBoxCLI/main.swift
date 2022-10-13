@@ -7,8 +7,5 @@
 //
 
 import Foundation
-import MBoxCore
 
-runCommander()
-
-
+loadAndRun()

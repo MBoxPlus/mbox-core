@@ -3,7 +3,7 @@
 //  MBox
 //
 //  Created by Whirlwind on 2018/8/21.
-//  Copyright © 2018年 Bytedance. All rights reserved.
+//  Copyright © 2018 Bytedance. All rights reserved.
 //
 
 import Foundation
@@ -15,6 +15,10 @@ public enum FileExistence: Equatable {
 }
 
 public extension String {
+    var fileName: String {
+        return (self as NSString).lastPathComponent.deletingPathExtension
+    }
+
     func appending(pathComponent: String) -> String {
         return (self as NSString).appendingPathComponent(pathComponent)
     }
@@ -39,10 +43,15 @@ public extension String {
         return (self as NSString).expandingTildeInPath
     }
 
+    var abbreviatingWithTildeInPath: String {
+        return (self as NSString).abbreviatingWithTildeInPath
+    }
+
     var cleanPath: String {
         let relative = !self.isAbsolutePath
         var paths = [String]()
         for path in self.split(separator: "/") {
+            if path == "." { continue }
             if path == ".." {
                 if paths.count > 0 && paths.last != ".." {
                     _ = paths.popLast()
@@ -65,6 +74,11 @@ public extension String {
 
     var isAbsolutePath: Bool {
         return (self as NSString).isAbsolutePath
+    }
+
+    func absolutePath(base: String = FileManager.pwd) -> String {
+        if self.isAbsolutePath { return self }
+        return base.appending(pathComponent: self)
     }
 
     var isExists: Bool {
@@ -99,7 +113,11 @@ public extension String {
         }
     }
 
-    var destinationOfSymlink: String {
+    var realpath: String {
+        return self.destinationOfSymlink ?? self
+    }
+
+    var destinationOfSymlink: String? {
         var targetPath = self
         do {
             let symlink = try FileManager.default.destinationOfSymbolicLink(atPath: targetPath)
@@ -109,7 +127,7 @@ public extension String {
                 targetPath = targetPath.deletingLastPathComponent.appending(pathComponent:symlink)
             }
         } catch {
-            return self
+            return nil
         }
         return targetPath.standardizingPath
     }
@@ -119,14 +137,13 @@ public extension String {
             return []
         }
         return urls.compactMap { url -> String? in
-            if let isRegularFile = try? url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile, isRegularFile {
+            if (try? url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true {
                 return url.path
             }
-            if let isSymbolic = try? url.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink, isSymbolic {
-                let path = url.path.destinationOfSymlink
-                if path.isFile {
-                    return url.path
-                }
+            if (try? url.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) == true,
+               let path = url.path.destinationOfSymlink,
+               path.isFile {
+                return url.path
             }
             return nil
         }
@@ -137,14 +154,13 @@ public extension String {
             return []
         }
         return urls.compactMap { url -> String? in
-            if let isDirectory = try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory, isDirectory {
+            if (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true {
                 return url.path
             }
-            if let isSymbolic = try? url.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink, isSymbolic {
-                let path = url.path.destinationOfSymlink
-                if path.isDirectory {
-                    return url.path
-                }
+            if (try? url.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) == true,
+               let path = url.path.destinationOfSymlink,
+               path.isDirectory {
+                return url.path
             }
             return nil
         }
@@ -165,6 +181,9 @@ public extension String {
         // Build relative path
         var relComponents = Array(repeating: "..", count: baseComponents.count - i)
         relComponents.append(contentsOf: destComponents[i...])
+        if relComponents.isEmpty {
+            return "."
+        }
         return relComponents.joined(separator: "/")
     }
 

@@ -10,10 +10,14 @@ import Foundation
 
 dynamic
 public func coder(for extension: String) -> MBCoder? {
-    switch `extension`.lowercased() {
+    var ext = `extension`.lowercased()
+    if !ext.hasPrefix(".") {
+        ext = ".\(ext)"
+    }
+    switch ext {
     case ".json":
         return MBJSONCoder.shared
-    case ".yml", ".yaml":
+    case ".yml", ".yaml", ".lock":
         return MBYAMLCoder.shared
     default:
         return nil
@@ -56,15 +60,19 @@ extension MBFileProtocol {
 
     @discardableResult
     public func save(filePath: String? = nil, sortedKeys: Bool = true, prettyPrinted: Bool = true) -> Bool {
-        guard let path = filePath ?? self.filePath else { return false }
+        guard let path = filePath ?? self.filePath else {
+            UI.log(error: "Save file failed: The file path is null.")
+            return false
+        }
         guard let coder = coder(for: path.pathExtension) ?? Self.defaultCoder else { return false }
         do {
             let string = try toString(coder: coder, sortedKeys: sortedKeys, prettyPrinted: prettyPrinted)
             try? FileManager.default.createDirectory(atPath: path.deletingLastPathComponent, withIntermediateDirectories: true, attributes: nil)
+            UI.log(verbose: "Save file `\(path)`...")
             try string.write(to: URL(fileURLWithPath: path), atomically: true, encoding: .utf8)
             return true
         } catch {
-            UI.log(error: "Save file failed: \(path)")
+            UI.log(error: "Save file failed: \(path)\n\t\(error)")
             return false
         }
     }
@@ -76,9 +84,11 @@ extension MBFileProtocol {
         if FileManager.default.fileExists(atPath: path) {
             do {
                 let content = try String(contentsOf: URL(fileURLWithPath: path), encoding: .utf8)
-                var item = try load(fromString: content, coder: coder)
-                item.filePath = path
-                return item
+                if !content.trimmed.isEmpty {
+                    var item = try load(fromString: content, coder: coder)
+                    item.filePath = path
+                    return item
+                }
             } catch {
                 UI.log(error: "Decode failed: \(path)\n\t\(error.localizedDescription)")
             }
@@ -94,9 +104,11 @@ extension MBFileProtocol {
         guard let coder = coder(for: path.pathExtension) ?? Self.defaultCoder else { return nil }
         do {
             let content = try String(contentsOf: URL(fileURLWithPath: path), encoding: .utf8)
-            var item = try load(fromString: content, coder: coder)
-            item.filePath = path
-            return item
+            if !content.trimmed.isEmpty {
+                var item = try load(fromString: content, coder: coder)
+                item.filePath = path
+                return item
+            }
         } catch {
             UI.log(error: "Decode failed: \(path)\n\t\(error.localizedDescription)")
         }

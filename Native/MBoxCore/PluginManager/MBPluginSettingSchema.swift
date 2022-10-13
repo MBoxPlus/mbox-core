@@ -22,6 +22,19 @@ public final class MBPluginSettingSchema: MBCodableObject, MBJSONProtocol {
     @Codable
     public var id: String?
 
+    public var fullName: String = "" {
+        didSet {
+            for (key, value) in self.properties ?? [:] {
+                if value.scopes.contains(where: { $0.lowercased() == "rc" }) ||
+                    self.scopes.contains(where: { $0.lowercased() == "rc" }) {
+                    value.fullName = key
+                } else {
+                    value.fullName = self.fullName + "." + key
+                }
+            }
+        }
+    }
+
     public var type: MBPluginSettingSchemaTypeName? {
         get {
             if let value = self.dictionary["type"] as? String {
@@ -80,14 +93,13 @@ public final class MBPluginSettingSchema: MBCodableObject, MBJSONProtocol {
     public var `enum`: [MBPluginSettingSchemaType]?
 
     @Codable
-    public var global: Bool?
-
-    public var path: String!
+    public var scopes: [String] = []
 
     public class func from(directory: String) -> MBPluginSettingSchema? {
         let path = directory.appending(pathComponent: "setting.schema.json")
-        let schema: MBPluginSettingSchema? = self.load(fromFile: path)
-        schema?.path = path
+        var schema: MBPluginSettingSchema? = self.load(fromFile: path)
+        schema?.filePath = path
+        schema?.fullName = schema?.id ?? ""
         return schema
     }
 }

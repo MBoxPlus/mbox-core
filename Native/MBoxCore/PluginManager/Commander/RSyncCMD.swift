@@ -19,7 +19,7 @@ open class RSyncCMD: MBCMD {
     open var version: String? {
         if Self.version == nil {
             if exec("--version"),
-                let matches = try? self.outputString.match("rsync +version +([^ ]+)") {
+                let matches = try? self.outputString.match(regex: "rsync +version +([^ ]+)") {
                 let version = matches.first?[1]
                 UI.log(verbose: "Rsync Version: \(version ?? "unknown")")
                 Self.version = version
@@ -37,17 +37,11 @@ open class RSyncCMD: MBCMD {
         }
     }
 
-    open func exec(sourceDir: String, targetDir: String, delete: Bool = false, ignoreExisting: Bool = true, progress: Bool = false, exclude: [String] = []) -> Bool {
-        var params = ["-avr"]
-        var excludes = exclude
-        excludes << ".DS_Store"
-        params << excludes.map { "--exclude=\($0)" }
-        if delete {
-            params.append("--delete")
-        }
-        if ignoreExisting {
-            params.append("--ignore-existing")
-        }
+    open func exec(sourceDirs: [String],
+                   targetDir: String,
+                   progress: Bool = false,
+                   options: [String]) -> Bool {
+        var params = options
         if progress {
             if greater(version: "3.1.0") {
                 params << "--info=progress2"
@@ -57,38 +51,27 @@ open class RSyncCMD: MBCMD {
                 params << "--stats"
             }
         }
-        params.append("\(sourceDir)/".quoted)
-        params.append(targetDir.quoted)
+        params << sourceDirs.map { "\($0)/".quoted }
+        params << targetDir.quoted
         if !targetDir.isExists {
             try? FileManager.default.createDirectory(atPath: targetDir, withIntermediateDirectories: true, attributes: nil)
         }
         return exec(params.joined(separator: " "))
     }
 
-    @discardableResult
-    open func exec(sourceFiles: [String], targetDir: String, removeSourceFiles: Bool = false) -> Bool {
-        var params = ["-avr", "--exclude=.DS_Store", "--delete"]
-        if removeSourceFiles {
-            params << "--remove-source-files"
+    open func exec(sourceDir: String,
+                   targetDir: String,
+                   delete: Bool = false,
+                   progress: Bool = false,
+                   excludes: [String] = []) -> Bool {
+        var params = ["-avr"]
+        var excludes = excludes
+        excludes << ".DS_Store"
+        params << excludes.map { "--exclude='\($0)'" }
+        if delete {
+            params.append("--delete")
+            params.append("--delete-excluded")
         }
-        let files = sourceFiles.filter { file -> Bool in
-            var path = file.expandingTildeInPath
-            if !path.hasPrefix("/") {
-                path = (self.workingDirectory ?? FileManager.pwd).appending(pathComponent: path)
-            }
-            return path.isExists
-        }
-        if files.isEmpty {
-            try? FileManager.default.removeItem(atPath: targetDir)
-            return true
-        }
-
-        params.append(contentsOf: files.map { $0.quoted } )
-        params << "\(targetDir)/".quoted
-
-        if !targetDir.isDirectory {
-            try? FileManager.default.createDirectory(atPath: targetDir, withIntermediateDirectories: true, attributes: nil)
-        }
-        return exec(params.joined(separator: " "))
+        return self.exec(sourceDirs: [sourceDir], targetDir: targetDir, progress: progress, options: params)
     }
 }

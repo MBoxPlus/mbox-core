@@ -2,19 +2,23 @@
 //  Dictionary+KeyPath.swift
 //  MBoxCore
 //
-//  Created by 詹迟晶 on 2019/12/17.
+//  Created by Whirlwind on 2019/12/17.
 //  Copyright © 2019 bytedance. All rights reserved.
 //
 
 import Foundation
 
 extension Dictionary {
+    mutating public func removeValue(forKeyPath keyPath: String) {
+        self.setValue(nil, forKeyPath: keyPath)
+    }
+
     mutating public func setValue(_ value: Any?, forKeyPath keyPath: String) {
         var keys = keyPath.components(separatedBy: ".")
         guard let first = keys.first as? Key else { print("Unable to use string as key on type: \(Key.self)"); return }
         keys.remove(at: 0)
         if keys.isEmpty {
-            if let settable = value as? Value {
+            if value != nil, let settable = value as? Value {
                 self[first] = settable
             } else {
                 self.removeValue(forKey: first)

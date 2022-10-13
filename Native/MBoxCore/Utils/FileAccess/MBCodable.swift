@@ -93,7 +93,7 @@ open class MBCodableObject: NSObject, MBCodable {
 
     public static func load(fromObject object: Any) throws -> Self {
         guard let dictionary = object as? [String: Any] else {
-            throw NSError(domain: "Convert Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "类型不匹配 \(self): \(object)"])
+            throw NSError(domain: "Convert Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "Type mismatch \(self): \(object)"])
         }
         let item = self.init(dictionary: dictionary)
         return item
@@ -114,8 +114,8 @@ open class MBCodableObject: NSObject, MBCodable {
                 if var property = child.value as? CodableProperty {
                     if let label = child.label {
                         property.name = String(label.dropFirst())
-                        if property.key == nil {
-                            property.key = property.name!.convertSnakeCased()
+                        if property.keys.isEmpty {
+                            property.keys = [property.name!.convertSnakeCased()]
                         }
                     }
                     property.instance = self
@@ -149,6 +149,10 @@ open class MBCodableObject: NSObject, MBCodable {
             mirror = m.superclassMirror
         }
     }
+
+    open override func copy() -> Any {
+        return Self.init(dictionary: self.dictionary)
+    }
 }
 
 extension String: MBCodable {
@@ -159,6 +163,7 @@ extension String: MBCodable {
         return "\(object)"
     }
 }
+extension NSString: MBCodable {}
 extension NSNumber: MBCodable {}
 extension Int: MBCodable {}
 extension Bool: MBCodable {}
@@ -171,7 +176,7 @@ extension Date: MBCodable {
         if let date = object as? Date {
             return date
         }
-        throw NSError(domain: "Convert Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "类型不匹配 \(self): \(object)"])
+        throw NSError(domain: "Convert Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "Type mismatch \(self): \(object)"])
     }
 
     public func toCodableObject() -> Any? {
@@ -182,6 +187,9 @@ extension Date: MBCodable {
 extension Array: MBCodable where Element: MBCodable {
 
     public static func load(fromObject object: Any) throws -> Self {
+        if let object = object as? Self {
+            return object
+        }
         if let object = object as? [Any] {
             return try object.compactMap {
                 try Element.load(fromObject: $0)
@@ -198,18 +206,28 @@ extension Array: MBCodable where Element: MBCodable {
 typealias OptionalAny = Optional<Any>
 extension Dictionary: MBCodable {
     public func toCodableObject() -> Any? {
-        return self.mapValues({ value -> Any? in
-            if case let OptionalAny.some(obj) = (value as Any) {
-                if let obj = obj as? MBCodable {
-                    return obj.toCodableObject()
-                } else if let dict = value as? [String: Any] {
-                    return dict.toCodableObject()
-                }
-                return value
+        return self.compactMapKeysAndValues { (key: Hashable, value: Any?) -> (String, Any?)? in
+            let vKey: String
+            if let key = key as? MBCodable {
+               if let key2 = key.toCodableObject() as? String {
+                   vKey = key2
+               } else {
+                   return nil
+               }
             } else {
                 return nil
             }
-        })
+            if case let OptionalAny.some(obj) = (value as Any) {
+                if let obj = obj as? MBCodable {
+                    return (vKey, obj.toCodableObject())
+                } else if let dict = value as? [String: Any] {
+                    return (vKey, dict.toCodableObject())
+                }
+                return (vKey, value)
+            } else {
+                return nil
+            }
+        }
     }
 
     public static func load(fromObject object: Any) throws -> Self {
@@ -218,9 +236,9 @@ extension Dictionary: MBCodable {
                 return object as! Dictionary<Key, Value>
         }
         guard let dict = object as? [AnyHashable: Any] else {
-            throw NSError(domain: "Convert Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "类型不匹配 \(self): \(object)"])
+            throw NSError(domain: "Convert Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "Type mismatch \(self): \(object)"])
         }
-        return try Dictionary(uniqueKeysWithValues: dict.map { key, value in
+        return try Dictionary(dict.map { key, value in
             try (k.load(fromObject: key), v.load(fromObject: value)) as! (Key, Value)
         })
     }

@@ -3,13 +3,56 @@
 //  MBoxCore
 //
 //  Created by Whirlwind on 2018/8/29.
-//  Copyright © 2018年 Bytedance. All rights reserved.
+//  Copyright © 2018 Bytedance. All rights reserved.
 //
 
-import CocoaLumberjack
+struct MBLogMessage {
+    var message: String
+    var flag: MBLogFlag
+    var context: Int
+    var pip: MBLoggerPipe
+    var fileName: StaticString
+    var function: StaticString
+    var line: UInt
+    var tag: Any?
+    var indents: [(flag: MBLogFlag, pip: MBLoggerPipe)]
+}
 
-extension DDLogFlag {
-    public static let api = DDLogFlag(rawValue: 1 << 5)
+protocol MBLoggerFormat {
+    func format(logMessage: MBLogMessage) -> String?
+}
+
+protocol MBLogger {
+    var async: Bool { get }
+    var queue: DispatchQueue { get }
+    var level: MBLogLevel { get }
+    var logFormatter: MBLoggerFormat? { get }
+    func logMessage(_ logMessage: MBLogMessage)
+    func isSupport(pip: MBLoggerPipe) -> Bool
+    func close()
+}
+
+public enum MBLogFlag: UInt {
+    case error = 1
+    case warning = 2
+    case api = 4
+    case info = 8
+    case debug = 16
+    case verbose = 32
+}
+
+public struct MBLogLevel: OptionSet {
+    public let rawValue: UInt
+    public init(rawValue: UInt) {
+        self.rawValue = rawValue
+    }
+
+    static let off = MBLogLevel([])
+    static let error = MBLogLevel(rawValue: MBLogFlag.error.rawValue)
+    static let warning = MBLogLevel(rawValue: MBLogLevel.error.rawValue + MBLogFlag.warning.rawValue)
+    static let info = MBLogLevel(rawValue: MBLogLevel.warning.rawValue + MBLogFlag.info.rawValue + MBLogFlag.api.rawValue)
+    static let debug = MBLogLevel(rawValue: MBLogLevel.info.rawValue + MBLogFlag.debug.rawValue)
+    static let verbose = MBLogLevel(rawValue: MBLogLevel.debug.rawValue + MBLogFlag.verbose.rawValue)
 }
 
 public struct MBLoggerPipe: OptionSet {
@@ -17,12 +60,15 @@ public struct MBLoggerPipe: OptionSet {
 
     public static let STDOUT = MBLoggerPipe(rawValue: 1 << 0)
     public static let STDERR = MBLoggerPipe(rawValue: 1 << 1)
-    public static let FILE = MBLoggerPipe(rawValue: 1 << 2)
+    public static let INFOFILE = MBLoggerPipe(rawValue: 1 << 3)
+    public static let VERBFILE = MBLoggerPipe(rawValue: 1 << 4)
 
     public static let STD: MBLoggerPipe = [.STDOUT, .STDERR]
+    public static let FILE: MBLoggerPipe = [.INFOFILE, .VERBFILE]
+
     public static let OUT: MBLoggerPipe = [.STDOUT, .FILE]
     public static let ERR: MBLoggerPipe = [.STDERR, .FILE]
-    public static let ALL: MBLoggerPipe = [.STDOUT, .STDERR, .FILE]
+    public static let ALL: MBLoggerPipe = [.STD, .FILE]
 
     public var hasSTD: Bool {
         return self.contains(.STDERR) || self.contains(.STDOUT)
@@ -56,153 +102,133 @@ public enum MBLoggerAPIFormatter: String, CaseIterable {
     case plain = "plain"
 }
 
-open class MBLogger: DDLog {
+open class MBLog {
 
     public var title: String?
 
     init(title: String? = nil) {
         self.title = title
-        super.init()
-
-        if MBCMD.isCMDEnvironment {
-            updateConsoleLoggerLevel()
-        }
     }
 
+    // MARK: - Pipe
     public var avaliablePipe: MBLoggerPipe = .ALL
-
-    public var verbose: Bool = false {
-        didSet {
-            if oldValue == verbose {
-                return
-            }
-            updateConsoleLoggerLevel()
+    public func with(pip: MBLoggerPipe, block: (() throws -> Void)) rethrows {
+        let lastPip = self.avaliablePipe
+        self.avaliablePipe = pip
+        defer {
+            self.avaliablePipe = lastPip
         }
+        try block()
     }
 
-    public var api: MBLoggerAPIFormatter = .none {
-        didSet {
-            if oldValue == api {
-                return
-            }
-            updateConsoleLoggerLevel()
-        }
+    // MARK: - Loggers
+    private var loggers: [MBLogger] = []
+
+    func add(logger: MBLogger) {
+        self.loggers.append(logger)
     }
 
-    // MARK: - Console
-    public lazy var consoleLogger: MBTTYLogger = {
-        let logger = MBTTYLogger.sharedInstance()!
-        logger.colorsEnabled = true
-        logger.logFormatter = MBLoggerXcodeFormatter()
-        logger.automaticallyAppendNewlineForCustomFormatters = false
-        logger.useStandardStyleForCustomFormatters = false
-        return logger
-    }()
-
-    private func updateConsoleLoggerLevel() {
-        self.remove(self.consoleLogger)
-        var level: DDLogLevel = verbose ? .all : .info
-        level = DDLogLevel(rawValue: level.rawValue | DDLogFlag.api.rawValue)!
-        if let formatter = self.consoleLogger.logFormatter as? MBLoggerFormatter {
-            formatter.logLevel = level
-        }
-        self.add(self.consoleLogger, with: level)
+    // MARK: Console Logger
+    var consoleLogger: Terminal? {
+        return self.loggers.compactMap { $0 as? Terminal }.first
     }
 
-    // MARK: - File
-    public var infoFilePath: String? {
-        didSet {
-            if let fileLogger = self.infoFileLogger {
-                self.remove(fileLogger)
-                self.infoFileLogger = nil
-            }
-            if let path = infoFilePath {
-                let logger = self.setupFileLogger(path: path)
-                self.add(logger, with: DDLogLevel(rawValue: DDLogLevel.info.rawValue + DDLogFlag.api.rawValue)!)
-                self.infoFileLogger = logger
-            }
-        }
+    // MARK: File Logger
+    var fileLoggers: [MBFileLogger] {
+        return self.loggers.compactMap { $0 as? MBFileLogger }
     }
+
+    public var customFilePath: Bool = false
+    public private(set) var filePath: String?
     public var verbFilePath: String? {
-        didSet {
-            if let fileLogger = self.verbFileLogger {
-                self.remove(fileLogger)
-                self.verbFileLogger = nil
+        self.fileLoggers.first { $0.level == .verbose }?.filePath
+    }
+
+    public func setFilePath(_ filePath: String) {
+        if customFilePath { return }
+        self.filePath = filePath
+        for logger in self.fileLoggers {
+            var path = filePath
+            if logger.level == .verbose {
+                path = path.deletingPathExtension.appending(pathExtension: "verbose").appending(pathExtension: path.pathExtension)
             }
-            if let path = verbFilePath {
-                let logger = self.setupFileLogger(path: path)
-                self.add(logger, with: DDLogLevel(rawValue: DDLogLevel.verbose.rawValue + DDLogFlag.api.rawValue)!)
-                self.verbFileLogger = logger
-            }
-        }
-    }
-    public var infoFileLogger: DDFileLogger?
-    public var verbFileLogger: DDFileLogger?
-    public func setupFileLogger(path: String) -> DDFileLogger {
-        let fm = MBLogFileManager(logPath: path)
-        let logger = DDFileLogger(logFileManager: fm)
-        logger.automaticallyAppendNewlineForCustomFormatters = false
-        logger.doNotReuseLogFiles = true
-        logger.logFormatter = MBLoggerFormatter()
-        return logger
-    }
-
-    public var logDirectory: String? {
-        set {
-            if (!self.avaliablePipe.hasFile) { return }
-            if self.infoFilePath != nil { return }
-            guard let dir = newValue else { return }
-            let date = Date()
-            self.infoFilePath = MBLogFileManager.generateFilePath(directory: dir, title: self.title, date: date, verbose: false)
-            self.verbFilePath = MBLogFileManager.generateFilePath(directory: dir, title: self.title, date: date, verbose: true)
-        }
-        get {
-            return self.infoFileLogger?.logFileManager.logsDirectory
+            logger.move(filePath: path)
         }
     }
 
-    public var verbLogFileInfo: DDLogFileInfo? {
-        return self.verbFileLogger?.currentLogFileInfo
-    }
-
-    public var infoLogFileInfo: DDLogFileInfo? {
-        return self.infoFileLogger?.currentLogFileInfo
+    public func setFilePath(with directory: String) {
+        self.setFilePath(MBFileLogger.generateFilePath(directory: directory, title: self.title, date: MBProcess.shared.beginTime))
     }
 
     // MARK: - API
     public func log(message: String,
-                    session: MBSession,
-                    level: DDLogLevel,
-                    flag: DDLogFlag,
+                    flag: MBLogFlag,
                     pip: MBLoggerPipe? = nil,
                     file: StaticString = #file,
                     function: StaticString = #function,
                     line: UInt = #line,
                     newLine: Bool = true) {
-        var string = message
+        var message = message
         if newLine {
-            string.append("\n")
+            message.append("\n")
         }
-        var pip = pip ?? (flag.contains(.error) || flag.contains(.warning) ? MBLoggerPipe.ERR : MBLoggerPipe.OUT)
-        pip = pip.intersection(self.avaliablePipe)
-        var std: MBLoggerPipe = pip
+        var pip = pip ?? self.avaliablePipe
+        if flag == .error || flag == .warning {
+            pip = .ERR
+        }
         if pip.hasSTD {
             if flag == .api {
-                std = std.withSTD(.OUT)
-            } else if UI.apiFormatter != .none {
-                std = std.withSTD(.ERR)
+                pip = pip.withSTD(.OUT)
+            } else if MBProcess.shared.apiFormatter != .none {
+                pip = pip.withSTD(.ERR)
             }
         }
-        _DDLogMessage(string,
-                      level: level,
-                      flag: flag,
-                      context: std.rawValue,
-                      file: file,
-                      function: function,
-                      line: line,
-                      tag: session,
-                      asynchronous: false,
-                      ddlog: self)
+        let logMessage = MBLogMessage(message: message, flag: flag, context: 0, pip: pip, fileName: file, function: function, line: line, tag: 0, indents: UI.indents)
+        self.log(message: logMessage, asynchronous: false)
     }
 
+    private func log(message: MBLogMessage,
+                     asynchronous: Bool) {
+        let pip = message.pip.intersection(self.avaliablePipe)
+        if pip.isEmpty {
+            return
+        }
+        for logger in self.loggers {
+            if logger.level.rawValue & message.flag.rawValue == 0 {
+                continue
+            }
+            if !logger.isSupport(pip: pip) {
+                continue
+            }
+            var logMessage = message
+            let block = {
+                if let logFormatter = logger.logFormatter {
+                    guard let message = logFormatter.format(logMessage: logMessage) else {
+                        return
+                    }
+                    logMessage.message = message
+                }
+                logger.logMessage(logMessage)
+            }
+            if logger.async {
+                logger.queue.async(execute: block)
+            } else {
+                logger.queue.sync(execute: block)
+            }
+        }
+    }
+
+    public func wait(close: Bool = false) {
+        let group = DispatchGroup()
+        for logger in self.loggers {
+            group.enter()
+            logger.queue.async {
+                if close {
+                    logger.close()
+                }
+                group.leave()
+            }
+        }
+        group.wait()
+    }
 }

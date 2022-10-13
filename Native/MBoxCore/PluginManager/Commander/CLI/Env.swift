@@ -8,13 +8,41 @@
 
 import Foundation
 
+public protocol MBCommanderEnv {
+    static var supportedAPI: [MBCommander.Env.APIType] { get }
+    static var title: String { get }
+    static var showTitle: Bool { get }
+    static var indent: Bool { get }
+
+    init()
+
+    func textRow() throws -> Row?
+    func textRows() throws -> [Row]?
+    func APIData() throws -> Any?
+    func plainData() throws -> [String]?
+}
+
+extension MBCommanderEnv {
+    public static var showTitle: Bool { return true }
+    public static var indent: Bool { return true }
+    public func textRow() throws -> Row? { return nil }
+    public func textRows() throws -> [Row]? { return nil }
+    public func APIData() throws -> Any?  { return nil }
+    public func plainData() throws -> [String]?  { return nil }
+}
+
 extension MBCommander {
     @objc(MBCommanderEnv)
     open class Env: MBCommander {
+        public enum APIType {
+            case none
+            case api
+            case plain
+        }
 
         open override class var options: [Option] {
             var options = super.options
-            options << Option("only", description: "Only show information.", values: self.sections())
+            options << Option("only", description: "Only show information.", valuesBlock: { return self.sections.map { $0.title } })
             return options
         }
 
@@ -24,88 +52,74 @@ extension MBCommander {
 
         dynamic
         open override func setup() throws {
-            self.mode = self.shiftOption("only")
+            self.only = (self.shiftOptions("only") ?? ["all"]).map { $0.lowercased() }
             try super.setup()
         }
 
-        open var mode: String?
+        open var only: [String] = ["all"]
+        open var sections: [MBCommanderEnv.Type] = []
+
+        open override func validate() throws {
+            try super.validate()
+            if MBProcess.shared.apiFormatter == .plain {
+                if self.sections.count > 1 {
+                    throw ArgumentError.conflict("It is not allowed with multiple sections when using `--api=plain`.")
+                }
+            }
+            var sections = [MBCommanderEnv.Type]()
+            let allSections = Self.sections
+            for only in self.only {
+                if only == "all" {
+                    sections.append(contentsOf: allSections)
+                } else if let section = allSections.first(where: { $0.title.lowercased() == only }) {
+                    sections.append(section)
+                }
+            }
+            for section in sections {
+                if !self.sections.contains(where: { $0 == section }) {
+                    self.sections.append(section)
+                }
+            }
+        }
 
         dynamic
         open override func run() throws {
             try super.run()
-            var sections = Self.sections()
-            if let mode = self.mode?.uppercased() {
-                sections = sections.filter { mode == $0.uppercased() }
-            }
-            for section in sections {
-                try show(section: section)
-                UI.log(info: "")
+            switch MBProcess.shared.apiFormatter {
+            case .none:
+                try self.showText(sections)
+            case .plain:
+                if let section = sections.first {
+                    try self.showPlain(section)
+                }
+            default:
+                try self.showAPI(sections)
             }
         }
 
         dynamic
-        open class func sections() -> [String] {
-            return ["SYSTEM", "PLUGINS"]
+        open class var allSections: [MBCommanderEnv.Type] {
+            return [System.self, Plugins.self]
+        }
+
+        open class var sections: [MBCommanderEnv.Type] {
+            let apiType: APIType
+            switch MBProcess.shared.apiFormatter {
+            case .none:
+                apiType = .none
+            case .plain:
+                apiType = .plain
+            default:
+                apiType = .api
+            }
+            return self.allSections.filter {
+                $0.supportedAPI.contains(apiType)
+            }
         }
 
         dynamic
-        open func show(section: String) throws {
-            if section == "SYSTEM" {
-                try UI.log(info: "[SYSTEM]:") {
-                    try showSystem()
-                }
-            } else if section == "PLUGINS" {
-                try UI.log(info: "[PLUGINS]:") {
-                    try showPlugins()
-                }
-            }
-        }
-
-        open func showSystem() throws {
-            let info = """
-            User Name: \(MBUser.current?.nickname ?? "")
-            User Email: \(MBUser.current?.email ?? "")
-            System \(ProcessInfo.processInfo.operatingSystemVersionString)
-            MBox \(MBoxCore.version)
-            """
-            UI.log(info: info)
-        }
-
-        open func showPlugins() throws {
-            let packages = UI.activedPlugins.sorted(by: \.name)
-            if UI.apiFormatter == .plain {
-                UI.log(api: packages.map { $0.path })
-                return
-            }
-            var values = [Any]()
-            for package in packages {
-                var required = [String]()
-                for alias in package.names {
-                    if let pluginDesc = UI.plugins.first(where: { (key, value) -> Bool in
-                        return key.lowercased() == alias.lowercased()
-                    })?.value  {
-                        required.append(contentsOf: pluginDesc.compactMap(\.requiredBy))
-                    }
-                }
-                let depended = packages.filter { $0.dependencies?.contains(package.name) == true }.map(\.name)
-                if UI.apiFormatter == .none {
-                    values << package.detailDescription(required: required, depended: depended)
-                } else {
-                    var dict = package.dictionary
-                    if !required.isEmpty {
-                        dict["REQUIRED_BY"] = required
-                        dict["DEPENDED_ON"] = depended
-                    }
-                    dict["PATH"] = package.path
-                    values << dict
-                }
-            }
-            if UI.apiFormatter == .json {
-                UI.log(api: values)
-            } else {
-                UI.log(info: values.map { $0 as! String }.joined(separator: "\n"))
-            }
+        public func instance(for section: MBCommanderEnv.Type) -> MBCommanderEnv {
+            return section.init()
         }
     }
 }
-

@@ -17,6 +17,7 @@ private func setupSingal() {
     ignoreSignal(SIGTTOU)
     trapSignal(.Crash) { signal in
         resetSTDIN()
+        UI.logger.consoleLogger?.disabeRawMode()
         UI.indents.removeAll()
         Thread.callStackSymbols.forEach{
             UI.log(info: $0)
@@ -24,14 +25,11 @@ private func setupSingal() {
 
         let signalName = "Receive Signal: \(String(cString: strsignal(signal)))"
         UI.log(summary: signalName)
-        let error = NSError(domain: "Signal",
-                            code: Int(signal),
-                            userInfo: [NSLocalizedDescriptionKey: signalName])
-        let code = finish(signal, error: error)
-        exitApp(code)
+        exitApp(signal, wait: false)
     }
     trapSignal(.Cancel) { signal in
         resetSTDIN()
+        UI.logger.consoleLogger?.disabeRawMode()
         let signalName = "[Cancel] \(String(cString: strsignal(signal)))"
         UI.log(summary: signalName.ANSI(.red))
         let error = NSError(domain: "Signal",
@@ -42,14 +40,13 @@ private func setupSingal() {
     }
 }
 
-private var startTime = Date()
 private func logCommander(parser: ArgumentParser) {
     let formatter = DateFormatter()
     formatter.calendar = Calendar(identifier: .iso8601)
     formatter.locale = Locale(identifier: "en_US_POSIX")
     formatter.timeZone = .current
     formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-    UI.log(info: "[\(formatter.string(from: startTime))] \(parser.rawDescription)", pip: .FILE)
+    UI.log(info: "[\(formatter.string(from: MBProcess.shared.beginTime))] \(parser.rawDescription)", pip: .FILE)
 }
 
 private var sessionTitle: String? {
@@ -61,9 +58,11 @@ private var sessionTitle: String? {
     return logNames.isEmpty ? nil : logNames.joined(separator: " ")
 }
 
-public func exitApp(_ exitCode: Int32) {
-    waitExit(exitCode)
-    MBSession.current = nil
+public func exitApp(_ exitCode: Int32, wait: Bool = true) {
+    try? FileManager.default.removeItem(atPath: FileManager.temporaryDirectory)
+    if wait {
+        waitExit(exitCode)
+    }
     exit(exitCode)
 }
 
@@ -73,22 +72,39 @@ public func runCommander() {
     var exitCode: Int32 = 0
     do {
         let code = try runCommander(CommandLine.arguments)
+        if exitSignal != nil { return }
+        exitSignal = 0
         exitCode = finish(code)
     } catch {
         if exitSignal != nil { return }
+        exitSignal = 0
         exitCode = finish(UI.statusCode, error: error)
         if !(error is UserError),
            !(error is ArgumentError),
-           let logFile = UI.logger.verbLogFileInfo {
-            UI.log(info: "The log was saved: `\(logFile.filePath)`")
+           let logFile = UI.logger.verbFilePath {
+            UI.log(info: "The log was saved: `\(logFile)`")
         }
     }
     exitApp(exitCode)
 }
 
+private func clearMBoxEnvironment() {
+    let info = ProcessInfo.processInfo
+    guard info.environment.has(key: "MBox") else {
+        return
+    }
+    let keepKeys = ["MBOX_CLI_PATH", "MBOX_DEV_ROOT"]
+    info.removeEnvironment(name: "MBox")
+    for (key, _) in info.environment {
+        if key.hasPrefix("MBOX_"), !keepKeys.contains(key) {
+            info.removeEnvironment(name: key)
+        }
+    }
+}
+
 public func runCommander(_ arguments: [String]) throws -> Int32 {
-    let session = MBSession(title: sessionTitle, isMain: true)
-    MBSession.main = session
+    let process = MBProcess.shared
+    process.mainThread.title = sessionTitle
 
     setupSingal()
 
@@ -97,22 +113,40 @@ public func runCommander(_ arguments: [String]) throws -> Int32 {
         resetSTDIN()
     }
 
+    clearMBoxEnvironment()
+
     if ProcessInfo.processInfo.environment["SUDO_USER"] != nil {
         print("[ERROR] Please not use `sudo`!")
         exit(254)
     }
 
     let parser = ArgumentParser(arguments: arguments)
-    UI.args = parser
-    if let root = try? parser.option(for: "root") {
-        UI.rootPath = root.expandingTildeInPath
+    process.args = parser
+
+    if parser.hasOption("api", shift: false),
+       let api = try? MBLoggerAPIFormatter(string: parser.option(for: "api") ?? "json") {
+        process.apiFormatter = api
     }
-    if ProcessInfo.processInfo.arguments.first?.lastPathComponent == "MDevCLI" {
-        guard let path = try? parser.option(for: "dev-root") ?? ProcessInfo.processInfo.environment["MBOX2_DEVELOPMENT_ROOT"] else {
-            print("[ERROR] `mdev` require the `--dev-root` option or `MBOX2_DEVELOPMENT_ROOT` environment variable.")
+
+    if let root = try? parser.option(for: "root") {
+        process.rootPath = root.expandingTildeInPath
+    }
+    if let home = try? parser.option(for: "home") {
+        MBSetting.globalDir = home
+    }
+    if let exeName = ProcessInfo.processInfo.arguments.first?.lastPathComponent,
+       exeName == "MDevCLI" || exeName == "mdev" {
+        guard let path = try? parser.option(for: "dev-root") ??
+                MBSetting.global.core?.devRoot,
+              !path.isEmpty else {
+            print("[ERROR] require configuration for `mbox config core.dev-root`.")
             exit(253)
         }
-        UI.devRoot = path.expandingTildeInPath
+        if !path.isDirectory {
+            print("[ERROR] `dev-root` is not directory.")
+            exit(253)
+        }
+        process.devRoot = path.expandingTildeInPath
     }
 
     if parser.hasOption("no-logfile") {
@@ -120,20 +154,26 @@ public func runCommander(_ arguments: [String]) throws -> Int32 {
     } else if let logfile = try? parser.option(for: "logfile"),
               logfile.count > 0,
               logfile.deletingPathExtension.count > 0 {
-        let ext = logfile.pathExtension
-        UI.logger.infoFilePath = logfile
-        UI.logger.verbFilePath = logfile.deletingPathExtension.appending(pathExtension: "verbose").appending(pathExtension: ext)
+        UI.setupFileLogger(filePath: logfile)
+        UI.logger.customFilePath = true
+    } else {
+        UI.setupFileLogger()
     }
 
-    MBPluginManager.shared.runAll()
+    MBProcess.shared.verbose = parser.hasOption("verbose") || parser.hasFlag("v")
+    if parser.hasOption("async") {
+        MBProcess.shared.allowAsync = true
+    } else if parser.hasOption("disable-async") {
+        MBProcess.shared.allowAsync = false
+    }
+
+    MBPluginManager.shared.loadAll()
 
     MBCommanderGroup.preParse(parser)
 
     _ = parser.argument()!  // Executable Name
 
     logCommander(parser: parser)
-
-    UI.verbose = parser.hasOption("verbose") || parser.hasFlag("v")
 
     var throwError: Error?
 
@@ -144,16 +184,21 @@ public func runCommander(_ arguments: [String]) throws -> Int32 {
         _ = try executeCommand(parser: parser)
     } catch let error as ArgumentError {
         let help = Help(command: cmdClass, group: cmdGroup, argv: parser)
-        if UI.showHelp, UI.apiFormatter != .none {
-            UI.log(api: help.APIDescription(format: UI.apiFormatter))
+        if MBProcess.shared.showHelp, MBProcess.shared.apiFormatter != .none {
+            UI.log(api: help.APIDescription(format: MBProcess.shared.apiFormatter))
         } else {
             if !error.description.isEmpty {
                 UI.log(info: error.description)
                 UI.log(info: "", pip: .ERR)
                 throwError = error
             }
-            UI.log(info: help.description,
-                   pip: .ERR)
+            if case let .help(msg) = error, let msg = msg {
+                UI.log(info: msg,
+                       pip: .ERR)
+            } else {
+                UI.log(info: help.description,
+                       pip: .ERR)
+            }
         }
     } catch let error as RuntimeError {
         throwError = error
@@ -191,9 +236,8 @@ public func executeCommand(parser: ArgumentParser) throws -> String {
     if let group = MBCommanderGroup.shared.command(for: parser) {
         cmdGroup = group
     } else {
-        // 使用 MBCommander 基类解析基础 Options/Flags
         _ = try cmdClass.init(argv: parser)
-        throw ArgumentError.invalidCommand("Not found command `\(parser.rawArguments.dropFirst().first!)`")
+        throw ArgumentError.invalidCommand("Not found command `\(parser.rawArguments.dropFirst().first!)` (\(MBProcess.shared.rootPath))")
     }
 
     if let cmd = cmdGroup.command {
@@ -204,19 +248,18 @@ public func executeCommand(parser: ArgumentParser) throws -> String {
 
     command = try cmdClass.init(argv: parser)
     try command?.performAction()
-    return UI.showHelp ? "help.\(cmdClass.fullName)" : cmdClass.fullName
+    return MBProcess.shared.showHelp ? "help.\(cmdClass.fullName)" : cmdClass.fullName
 }
 
 @discardableResult
 dynamic public func finish(_ code: Int32, error: Error? = nil) -> Int32 {
     UI.logSummary()
 
-    let finishTime = Date()
-    UI.duration = finishTime.timeIntervalSince(startTime)
-    let duration = MBSession.durationFormatter.string(from: startTime, to: finishTime)!
+    MBProcess.shared.endTimer()
+    let duration = MBThread.durationFormatter.string(from: MBProcess.shared.beginTime, to: MBProcess.shared.endTime!)!
     UI.log(verbose: "==" * 20 + " " + duration + " " + "==" * 20, pip: .FILE)
 
-    let error = UI.showHelp ? nil : error
+    let error = MBProcess.shared.showHelp ? nil : error
     var exitCode: Int32 = 0
     if code != 0 {
         exitCode = code
@@ -235,5 +278,5 @@ dynamic public func finish(_ code: Int32, error: Error? = nil) -> Int32 {
 
 dynamic
 public func waitExit(_ code: Int32) {
-    try? FileManager.default.removeItem(atPath: FileManager.temporaryDirectory)
+    UI.logger.wait(close: true)
 }

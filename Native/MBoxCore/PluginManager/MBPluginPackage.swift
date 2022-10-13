@@ -2,54 +2,13 @@
 //  MBPluginPackage.swift
 //  MBoxCore
 //
-//  Created by 詹迟晶 on 2020/3/12.
+//  Created by Whirlwind on 2020/3/12.
 //  Copyright © 2020 bytedance. All rights reserved.
 //
 
 import Foundation
 
-public final class MBPluginPackage: MBCodableObject, MBYAMLProtocol {
-
-    @Codable(key: "DEPENDENCIES")
-    public var dependencies: [String]?
-
-    @Codable(key: "NATIVE_DEPENDENCIES")
-    public var native_dependencies: [String: [String]]?
-
-    public func dependencies(for name: String? = nil) -> [String]? {
-        guard let name = name else { return self.dependencies }
-        if name.isEmpty {
-            return dependencies
-        }
-        return native_dependencies?[name]
-    }
-
-    @Codable(key: "NAME")
-    public var name: String
-
-    @Codable(key: "ALIAS")
-    public var alias: [String]?
-
-    @Codable(key: "CLI")
-    public var CLI: Bool?
-
-    @Codable(key: "GUI")
-    public var GUI: Bool?
-
-    @Codable(key: "GROUPS")
-    public var groups: [String]?
-
-    public var names: [String] {
-        var names = [name]
-        if let alias = self.alias {
-            names.append(contentsOf: alias)
-        }
-        return names
-    }
-
-    public func isPlugin(_ name: String) -> Bool {
-        return names.map { $0.lowercased() }.contains(name.lowercased())
-    }
+public final class MBPluginPackage: MBPluginModule {
 
     @Codable(key: "VERSION")
     public var version: String
@@ -84,43 +43,40 @@ public final class MBPluginPackage: MBCodableObject, MBYAMLProtocol {
     @Codable(key: "MINIMUM_VERSION")
     public var minimum_version: String?
 
-    @Codable(key: "REQUIRED")
-    public var required: Bool = false
+    @Codable(key: "SWIFT_VERSION")
+    public var swiftVersion: String?
 
-    public enum MBPluginScope: String, CaseIterable {
-        case APPLICATION = "APPLICATION"
-        case WORKSPACE = "WORKSPACE"
-        case REPOSITORY = "REPOSITORY"
+    @Codable(key: "AUTO_ACTIVATE")
+    public var autoActivate: Bool = false
 
-        public func capitalizedFirstLetterValue() -> String {
-            return self.rawValue.capitalizedFirstLetter
-        }
+    public override func bindProperties() {
+        super.bindProperties()
+        self.package = self
     }
 
-    public var scope: MBPluginScope {
-        set {
-            self.dictionary["SCOPE"] = MBPluginScope(rawValue: newValue.rawValue)
-        }
-        get {
-            if let scope = self.dictionary["SCOPE"] as? String {
-                for c in MBPluginScope.allCases {
-                    if c.rawValue == scope {
-                        return c
-                    }
-                }
-            }
-            return .WORKSPACE
-        }
+    // MARK: - Module
+    public lazy var allModules: [MBPluginModule] = [self] + self.allSubModules
+    private lazy var allModulesHash: [String: MBPluginModule] = {
+        return Dictionary(allModules.map { ($0.name.lowercased(), $0) } )
+    }()
+    public func module(named: String) -> MBPluginModule? {
+        return self.allModulesHash[named.replacingOccurrences(of: "/", with: "").lowercased()]
     }
-    public lazy var settingSchema: MBPluginSettingSchema? = .from(directory: path)
 
-    public var path: String!
+    public func createModule(name: String, root: String) throws -> MBPluginModule {
+        if let module = self.module(named: name) { return module }
+        let superName = name.split(separator: "/").dropLast().joined(separator: "/")
+        guard let module = self.module(named: superName) else {
+            throw UserError("Could not find parent module `\(superName)`.")
+        }
+        return module.createSubmodule(name: name, root: root)
+    }
 
-    public class func from(directory: String) -> MBPluginPackage? {
-        let path = directory.appending(pathComponent: "manifest.yml")
-        let package: MBPluginPackage? = self.load(fromFile: path)
-        package?.path = directory
-        return package
+    // MARK: - Public class methods
+    public class override func from(directory: String) -> MBPluginPackage? {
+        let v = super.from(directory: directory) as? MBPluginPackage
+        v?.package = v
+        return v
     }
 
     public class func search(directory: String) -> [String: MBPluginPackage] {
@@ -137,74 +93,19 @@ public final class MBPluginPackage: MBCodableObject, MBYAMLProtocol {
         return pluginPaths
     }
 
+    public class func packageName(for string: String) -> String {
+        return String(string.split(separator: "/").first!)
+    }
+
+    // MAKR: - Status
     public var isUnderDevelopment: Bool = false
 
     public var isInApplication: Bool = false
 
     public var isInUserDirectory: Bool = false
 
-    public lazy var dataDir: String = FileManager.home.appending(pathComponent: ".mbox/data/\(self.name)")
-
-    // MARK: - Native
-    public lazy var nativeBundleDir: String? = {
-        guard self.CLI == true, let dir = self.dir else { return nil }
-        let count = dir.subDirectories.filter {
-            $0.pathExtension == "framework"
-        }.count
-        return count == 0 ? nil : dir
-    }()
-
-    public lazy var pluginBundles: [PluginBundle] = {
-        guard let dir = nativeBundleDir else { return [] }
-        let bundles = dir.subDirectories.filter {
-            $0.pathExtension == "framework"
-        }
-        return bundles.map { path in
-            let name = path.lastPathComponent.deletingPathExtension
-            return PluginBundle(name: name.deletePrefix(self.name),
-                                path: path,
-                                package: self)
-        }
-    }()
-
-    public lazy var defaultBundle: PluginBundle? = {
-        return pluginBundle()
-    }()
-
-    public lazy var loaderBundle: PluginBundle? = {
-        return pluginBundle(for: "Loader")
-    }()
-
-    public func pluginBundle(for name: String? = nil) -> PluginBundle? {
-        return self.pluginBundles.first { $0.name == (name ?? "") }
-    }
-
-    @discardableResult
-    public func load() -> Bool {
-        return self.defaultBundle?.load() ?? false
-    }
-
-    @discardableResult
-    public func unload() -> Bool {
-        return self.defaultBundle?.unload() ?? true
-    }
-
-    public func registerCommanders() {
-        for bundle in self.pluginBundles where bundle.isLoaded {
-            bundle.registerCommanders()
-        }
-    }
-
-    // MARK: - Ruby
-    @Codable(key: "RUBY")
-    public var hasRuby: Bool = false
-
-    public lazy var rubyDir: String? = {
-        guard hasRuby else { return nil }
-        let path = self.path.appending(pathComponent: "Ruby")
-        guard path.isDirectory else { return nil }
-        return path
-    }()
+    // MARK: - Data
+    public lazy var dataDir: String = MBSetting.globalDir.appending(pathComponent: "data/\(self.name)")
 
     // MARK: - Resources
     public lazy var resourcesDir: String? = {
@@ -245,44 +146,44 @@ public final class MBPluginPackage: MBCodableObject, MBYAMLProtocol {
         return items
     }()
 
+    // MARK: - Description
     public override var description: String {
-        return "<MBPluginPackage \(self.name) (\(self.path ?? ""))>"
+        return "\(self.name) (\(self.version)) \(self.path.ANSI(.black, bright: true))"
     }
 
-    dynamic
-    public func detailDescription(required: [String]? = nil, depended: [String]? = nil) -> String {
-        var desc = name.ANSI(.yellow) + " " + "(\(version))".ANSI(.magenta) + ":"
-        desc <<< "  PATH: \(self.path ?? "")"
-        if let dir = self.nativeBundleDir, self.path != dir {
-            desc <<< "  FRAMEWORK: \(dir)"
+    // MARK: - Merge
+    override func merge(_ objects: [MBPluginModule]) {
+        super.merge(objects)
+        guard let packages = objects as? [MBPluginPackage] else {
+            return
         }
-        if let alias = self.alias, !alias.isEmpty {
-            desc <<< "  ALIAS: \(alias.joined(separator: ", "))"
+        if self.resourcesDir == nil {
+            self.resourcesDir = packages.firstMap { $0.resourcesDir }
         }
-        if let commitID = self.commitID {
-            desc <<< "  COMMIT: \(commitID)"
+        if self.launcherDir == nil {
+            self.launcherDir = packages.firstMap { $0.launcherDir }
         }
-        if let commitDate = self.commitDate {
-            desc <<< "  DATE: \(commitDate)"
+        if !self.isInApplication {
+            self.isInApplication = packages.contains { $0.isInApplication }
         }
-        if let dps = self.dependencies, !dps.isEmpty {
-            desc <<< "  DEPENDENCIES:"
-            for dp in dps {
-                desc <<< "    - \(dp)"
-            }
-        }
-        if let required = required, !required.isEmpty {
-            desc <<< "  REQUIRED BY:"
-            for dp in required {
-                desc <<< "    - \(dp)"
-            }
-        }
-        if let depended = depended, !depended.isEmpty {
-            desc <<< "  DEPENDED ON:"
-            for dp in depended {
-                desc <<< "    - \(dp)"
-            }
-        }
-        return desc
+    }
+}
+
+extension MBPluginPackage: Comparable {
+
+    public static func < (lhs: MBPluginPackage, rhs: MBPluginPackage) -> Bool {
+        return lhs.name < rhs.name
+    }
+
+    public static func <= (lhs: MBPluginPackage, rhs: MBPluginPackage) -> Bool {
+        return lhs.name <= rhs.name
+    }
+
+    public static func >= (lhs: MBPluginPackage, rhs: MBPluginPackage) -> Bool {
+        return lhs.name >= rhs.name
+    }
+
+    public static func > (lhs: MBPluginPackage, rhs: MBPluginPackage) -> Bool {
+        return lhs.name > rhs.name
     }
 }

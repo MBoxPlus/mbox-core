@@ -2,7 +2,7 @@
 //  Activate.swift
 //  MBoxCore
 //
-//  Created by 詹迟晶 on 2020/11/17.
+//  Created by Whirlwind on 2020/11/17.
 //  Copyright © 2020 bytedance. All rights reserved.
 //
 
@@ -48,7 +48,7 @@ extension MBCommander.Plugin {
                 }
             }
 
-            UI.reloadPlugins()
+            MBProcess.shared.reloadPlugins()
             try self.setupLauncher(force: true)
         }
 
@@ -57,7 +57,6 @@ extension MBCommander.Plugin {
         }
 
         open var names: [String] = []
-        open var isScopeCheckNeeded: Bool = false
 
         open lazy var settings: [MBSetting]? = {
             return fetchSetting()
@@ -65,17 +64,6 @@ extension MBCommander.Plugin {
 
         dynamic
         open func fetchSetting() -> [MBSetting]? {
-            if self.isScopeCheckNeeded {
-                for name in self.names {
-                    if let package = MBPluginManager.shared.package(for: MBSetting.pluginName(for: name)) {
-                        if package.scope != .APPLICATION {
-                            UI.log(error: "Plugin `\(name)` cannot be enabled/disabled in `Application` scope")
-                            return nil
-                        }
-                    }
-                }
-            }
-
             return [MBSetting.global]
         }
     }

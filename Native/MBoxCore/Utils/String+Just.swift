@@ -31,6 +31,12 @@ extension String {
         let rightPadded = self.padding(toLength:max(count, length), withPad:pad, startingAt:0)
         return "".padding(toLength:length, withPad:rightPadded, startingAt:(length+count)/2 % length)
     }
+    public func trailingTrim(_ characterSet: CharacterSet = .whitespaces) -> String {
+        if let range = rangeOfCharacter(from: characterSet, options: [.anchored, .backwards]) {
+            return String(self[..<range.lowerBound]).trailingTrim(characterSet)
+        }
+        return self
+    }
 }
 
 public class Row {
@@ -50,7 +56,7 @@ public class Row {
         self.columns = columns
     }
     public var description: [String] {
-        var v = [text]
+        var v = [text.trailingTrim()]
         if let sub = subRows?.flatMap(\.description) {
             v.append(contentsOf: sub)
         }
@@ -58,12 +64,12 @@ public class Row {
     }
 }
 
-public func formatTable(_ rows: [Row], separator: String = "  ") -> [String] {
-    formatTable(rows, indent: 4)
+public func formatTable(_ rows: [Row], indent: Int = 4, separator: String = "  ") -> [String] {
+    formatTable(rows: rows, indent: indent, separator: separator)
     return rows.flatMap(\.description)
 }
 
-private func formatTable(_ rows: [Row], indent: Int, separator: String = "  ") {
+private func formatTable(rows: [Row], indent: Int, separator: String = "  ") {
     let result: [String]
     let lines = rows.map(\.columns)
     if let rows = lines as? [[[String]]] {
@@ -74,17 +80,22 @@ private func formatTable(_ rows: [Row], indent: Int, separator: String = "  ") {
         return
     }
     for (i, row) in rows.enumerated() {
-        let prefix: String
+        var prefix: String
         if row.selected {
-            prefix = max(0, indent - row.selectedPrefix.noANSI.count - 1) * " " + row.selectedPrefix + " "
+            prefix = row.selectedPrefix
         } else {
-            prefix = max(0, indent - row.unselectedPrefix.noANSI.count - 1) * " " + row.unselectedPrefix + " "
+            prefix = row.unselectedPrefix
+        }
+        let length = prefix.noANSI.count
+        prefix = max(0, indent - length - (length == 0 ? 0 : 1)) * " " + prefix
+        if length > 0 {
+            prefix.append(" ")
         }
         row.text = prefix + result[i]
     }
     let subRows = rows.compactMap(\.subRows).flatMap { $0 }
     if subRows.count > 0 {
-        formatTable(subRows, indent: indent + 4, separator: separator)
+        formatTable(rows: subRows, indent: indent + 4, separator: separator)
     }
 }
 

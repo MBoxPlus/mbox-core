@@ -37,7 +37,9 @@ extension Data {
     ///   - output: The type of hash output desired, defaults to .hex.
     ///   - Returns: The requested hash output or nil if failure.
     public func hashed(_ type: HashType, output: HashOutputType = .hex) -> String? {
-
+        if type == .md5 {
+            return MD5(self.string(encoding: .utf8)!);
+        }
         // setup data variable to hold hashed value
         var digest = Data(count: Int(type.length))
 
@@ -46,7 +48,7 @@ extension Data {
                 if let mb = messageBytes.baseAddress, let db = digestBytes.bindMemory(to: UInt8.self).baseAddress {
                     let length = CC_LONG(self.count)
                     switch type {
-                    case .md5: CC_MD5(mb, length, db)
+                    case .md5: break
                     case .sha1: CC_SHA1(mb, length, db)
                     case .sha224: CC_SHA224(mb, length, db)
                     case .sha256: CC_SHA256(mb, length, db)

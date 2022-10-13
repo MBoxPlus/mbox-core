@@ -3,7 +3,7 @@
 //  MBoxCore
 //
 //  Created by Whirlwind on 2018/9/13.
-//  Copyright © 2018年 Bytedance. All rights reserved.
+//  Copyright © 2018 Bytedance. All rights reserved.
 //
 
 import Foundation
@@ -37,14 +37,24 @@ public protocol JSONSerializable {
 
 extension Dictionary: JSONSerializable where Key == String, Value: Any{
     public func toJSONString(pretty: Bool = true) -> String? {
+        guard let obj = self.toCodableObject() else { return nil }
         var options: JSONSerialization.WritingOptions = []
         if pretty {
             options.insert(.prettyPrinted)
         }
-        guard let data = try? JSONSerialization.data(withJSONObject: self, options: options) else {
+        guard let data = try? JSONSerialization.data(withJSONObject: obj, options: options) else {
             return nil
         }
         return String(data: data, encoding: String.Encoding.utf8)
+    }
+}
+
+extension NSDictionary: JSONSerializable {
+    public func toJSONString(pretty: Bool = true) -> String? {
+        if let v = self as? [String: Any] {
+            return v.toJSONString(pretty: pretty)
+        }
+        return nil
     }
 }
 
@@ -58,5 +68,11 @@ extension Array: JSONSerializable {
             return nil
         }
         return String(data: data, encoding: String.Encoding.utf8)
+    }
+}
+
+extension NSArray: JSONSerializable {
+    public func toJSONString(pretty: Bool = true) -> String? {
+        return (self as Array).toJSONString(pretty: pretty)
     }
 }

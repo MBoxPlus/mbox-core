@@ -1,5 +1,0 @@
-${PODS_ROOT}/MBoxCore/repackage-dylibs.rb
-${TARGET_BUILD_DIR}/$(EXECUTABLE_PATH)
-${SRCROOT}/../manifest.yml
-${SRCROOT}/${PROJECT_NAME}.podspec
-${PODS_ROOT}/Target Support Files/Pods-${TARGET_NAME}/Pods-${TARGET_NAME}-frameworks-${CONFIGURATION}-output-files.xcfilelist

@@ -17,7 +17,7 @@ extension MBCommander.Plugin {
 
         open override func run() throws {
             try super.run()
-            if UI.apiFormatter == .none {
+            if MBProcess.shared.apiFormatter == .none {
                 outputPlain()
             } else {
                 outputData()
@@ -26,13 +26,12 @@ extension MBCommander.Plugin {
 
         dynamic
         open var packages: [MBPluginPackage] {
-            let packages = Array(MBPluginManager.shared.allPackages.values)
-            return packages
+            return Array(MBPluginManager.shared.allPackages)
         }
 
         open func outputPlain() {
             for package in self.packages.sorted(by: \.name) {
-                UI.log(info: package.detailDescription())
+                UI.log(info: package.packageDetailDescription().joined(separator: "\n"))
                 UI.log(info: "")
             }
         }
@@ -41,7 +40,7 @@ extension MBCommander.Plugin {
             let data = Dictionary<String, Any>(uniqueKeysWithValues: self.packages.map { package in
                 return (package.name, package.dictionary)
             })
-            UI.log(api: data)
+            UI.log(api: data.toCodableObject()!)
         }
     }
 }

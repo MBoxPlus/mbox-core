@@ -7,9 +7,52 @@
 //
 
 import Foundation
+#if os(Linux)
+import Glibc
+let system_glob = Glibc.glob
+#else
+import Darwin
+let system_glob = Darwin.glob
+#endif
 
 var FileManagerTemporaryDirectoryKey: UInt8 = 0
 extension FileManager {
+    private static func glob<T>(_ pattern: String, block: (_ matchc: Int, _ pathv: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>) -> T?) -> T? {
+        var gt = glob_t()
+        let cPattern = strdup(pattern)!
+        defer {
+            globfree(&gt)
+            free(cPattern)
+        }
+
+        let flags = GLOB_TILDE | GLOB_BRACE | GLOB_MARK
+        guard system_glob(cPattern, flags, nil, &gt) == 0 else {
+            // GLOB_NOMATCH
+            return nil
+        }
+        #if os(Linux)
+        let matchc = gt.gl_pathc
+        #else
+        let matchc = gt.gl_matchc
+        #endif
+        return block(Int(matchc), gt.gl_pathv)
+    }
+
+    public static func glob(_ pattern: String) -> [String] {
+        return self.glob(pattern) { (matchc, pathv) in
+            return (0..<matchc).compactMap {
+                String(validatingUTF8: pathv[$0]!)
+            }
+        } ?? []
+    }
+
+    public static func glob(_ pattern: String) -> String? {
+        return self.glob(pattern) { (matchc, pathv) in
+            if matchc == 0 { return nil }
+            return String(validatingUTF8: pathv[0]!)
+        }
+    }
+
     public class var temporaryDirectory: String {
         return associatedObject(base: self, key: &FileManagerTemporaryDirectoryKey) {
             let path = NSTemporaryDirectory().appending(pathComponent: "MBox").appending(pathComponent: NSUUID().uuidString)

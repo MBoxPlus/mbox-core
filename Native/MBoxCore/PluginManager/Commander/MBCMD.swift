@@ -3,7 +3,7 @@
 //  MBoxCore
 //
 //  Created by Whirlwind on 2018/9/17.
-//  Copyright © 2018年 Bytedance. All rights reserved.
+//  Copyright © 2018 Bytedance. All rights reserved.
 //
 
 import Foundation
@@ -38,6 +38,9 @@ extension ObjCShell: MBInputHandlerDelegate {
 }
 
 open class MBCMD: NSObject {
+    open var UI: MBThread
+    public static var UI: MBThread { return MBThread.current }
+
     open var useTTY: Bool
     open class var isCMDEnvironment: Bool {
         set {
@@ -56,14 +59,15 @@ open class MBCMD: NSObject {
         return shell.errorString
     }
 
-    open var workingDirectory: String?
+    open lazy var workingDirectory: String = MBProcess.shared.rootPath
 
     dynamic
     open func setupEnvironment(_ base: [String: String]? = nil) -> [String: String] {
         var env = base ?? [:]
         env["MBox"] = MBoxCore.bundle.shortVersion
-        env["MBOX_ARGS"] = UI.args.rawDescription
+        env["MBOX_ARGS"] = MBProcess.shared.args.rawDescription
         env["NSUnbufferedIO"] = "YES"
+        env["MBOX_CLI_PATH"] = ProcessInfo.processInfo.arguments.first!
         return env
     }
     public lazy var env: [String: String] = setupEnvironment()
@@ -75,7 +79,9 @@ open class MBCMD: NSObject {
 
     dynamic
     public required init(useTTY: Bool? = nil) {
-        self.useTTY = useTTY ?? !UI.fromGUI
+        let ui = MBThread.current
+        self.UI = ui
+        self.useTTY = (useTTY ?? true) && (ui.terminal?.isTTY ?? false)
         super.init()
         self.setup()
     }
@@ -88,19 +94,27 @@ open class MBCMD: NSObject {
     }
 
     public var showOutput: Bool = false
+    public var quite: Bool = false
 
     func scriptPath(name: String, ofType: String) -> String {
         return ObjCShell.script(forName: name, ofType: ofType)
     }
 
     open var bin: String = ""
+    open var args: [String] = []
 
     open var binExists: Bool {
         return Self.executableExists(self.bin, env: self.env)
     }
 
     open func cmdString(_ string: String, sudo: Bool = false, prompt: String? = nil) -> String {
-        let string = bin.isEmpty ? string : "\(bin) \(string)"
+        var items = [String]()
+        if !self.bin.isEmpty {
+            items.append(self.bin)
+        }
+        items.append(contentsOf: self.args)
+        items.append(string)
+        let string = items.joined(separator: " ")
         if sudo {
             return ObjCShell.command(withAdministrator: string, prompt: prompt ?? "Password:")!
         }
@@ -133,17 +147,19 @@ open class MBCMD: NSObject {
         if let code = exitSignal { return code }
         let workingDirectory = workingDirectory ?? self.workingDirectory
         let string = self.cmdString(string, sudo: sudo)
-        let title = workingDirectory == nil || workingDirectory == FileManager.pwd ? "" : "$ cd \(workingDirectory!.quoted)\n"
+        let title = workingDirectory == FileManager.pwd ? "" : "$ cd \(workingDirectory.quoted)\n"
         return UI.log(verbose: "\(title)$ \(string)".ANSI(.cyan)) {
-            self.shell.logOutputStringBlock = { self.logOutputString($0) }
-            self.shell.logErrorStringBlock = { self.logErrorString($0) }
+            if !quite {
+                self.shell.logOutputStringBlock = { self.logOutputString($0) }
+                self.shell.logErrorStringBlock = { self.logErrorString($0) }
+            }
             UI.runningCMDs.append(self)
             defer {
                 self.shell.logOutputStringBlock = nil
                 self.shell.logErrorStringBlock = nil
                 UI.runningCMDs.removeAll { $0 === self }
             }
-            var environment = ProcessInfo.processInfo.environment
+            var environment = MBProcess.shared.environment
             environment.mergeEnvironment(env: self.env)
             if let env = env {
                 environment.mergeEnvironment(env: env)
@@ -153,6 +169,23 @@ open class MBCMD: NSObject {
                 MBInputHandler.shared.removeDelegate(self.shell)
             }
             return self.shell.executeCommand(string, inWorkingDirectory: workingDirectory, env: environment)
+        }
+    }
+
+    public func detach(_ string: String, env: [String: String]? = nil) {
+        try? self.setupExecute()
+        if let _ = exitSignal { return }
+        let workingDirectory = self.workingDirectory
+        let string = self.cmdString(string, sudo: false)
+        let title = workingDirectory == FileManager.pwd ? "" : "$ cd \(workingDirectory.quoted)\n"
+        UI.log(verbose: "\(title)$ [DETACH] \(string)".ANSI(.cyan)) {
+            var environment = ProcessInfo.processInfo.environment
+            environment.mergeEnvironment(env: self.env)
+            if let env = env {
+                environment.mergeEnvironment(env: env)
+            }
+            self.shell.detach = true
+            self.shell.executeCommand(string, inWorkingDirectory: workingDirectory, env: environment)
         }
     }
 
@@ -184,13 +217,13 @@ open class MBCMD: NSObject {
         if let env = env {
             cmd.env = env
         }
-        return cmd.exec("which \(executable.split(separator: " ").first!)") == 0
+        return cmd.exec("which \(argumentParse(executable).first!.quoted)") == 0
     }
 
     public static var status: Bool = false
 
     public static func installZSHAutocompletion() throws {
-        for name in ["mbox", "mdev", "mbox2"] {
+        for name in ["mbox", "mdev"] {
             guard let shellPath = MBoxCore.bundle.path(forResource: "Autocompletion/\(name)", ofType: "sh") else { return }
             let zshPluginPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".oh-my-zsh").path
             guard zshPluginPath.isDirectory else {
@@ -198,15 +231,18 @@ open class MBCMD: NSObject {
             }
             var targetPath = zshPluginPath.appending(pathComponent: "custom/plugins/\(name)")
             if !FileManager.default.fileExists(atPath: targetPath) {
+                UI.log(verbose: "Create directory `\(targetPath)`")
                 try FileManager.default.createDirectory(atPath: targetPath, withIntermediateDirectories: true, attributes: nil)
             }
             targetPath = targetPath.appending(pathComponent: "_\(name)")
             if targetPath.isExists {
+                UI.log(verbose: "Remove `\(targetPath)`")
                 try FileManager.default.removeItem(atPath: targetPath)
             }
+            UI.log(verbose: "Link `\(targetPath)` -> `\(shellPath)`")
             try FileManager.default.createSymbolicLink(atPath: targetPath, withDestinationPath: shellPath)
         }
-        // 移除 zcompdump 缓存
+        // Remove zcompdump cache
         for file in FileManager.default.homeDirectoryForCurrentUser.path.subFiles {
             if file.lastPathComponent.starts(with: ".zcompdump") {
                 UI.log(verbose: "remove `\(file)`") {
@@ -226,49 +262,44 @@ open class MBCMD: NSObject {
             try cmd.sudoExec("chown -R '\(NSUserName())' '\(binDir)'",
                              prompt: "`\(binDir)` is not writable，MBox will change the ownership to your user!\nAdmin Password:")
         }
-        try installCommandLine("mbox", binDir: binDir)
-        try installCommandLine("mbox2", binDir: binDir, scriptName: "mbox")
-        try installCommandLine("mdev", binDir: binDir)
+        try installCommandLine("mbox", binDir: binDir, scriptName: "MBoxCLI")
+        try installCommandLine("mdev", binDir: binDir, scriptName: "MDevCLI")
     }
 
-    public static func installCommandLine(_ binName: String, binDir: String, scriptName: String? = nil) throws {
+    private static func installCommandLine(_ binName: String, binDir: String, scriptName: String) throws {
         let cmdPath = binDir.appending(pathComponent: binName)
-        let exeDir = MBoxCore.bundle.bundleURL.deletingLastPathComponent().path
-        let shellPath = MBoxCore.bundle.bundleURL.deletingLastPathComponent().appendingPathComponent("\(scriptName ?? binName).sh").path
-        if FileManager.default.fileExists(atPath: cmdPath) {
+        let exePath = MBoxCore.bundle.bundlePath.deletingLastPathComponent.appending(pathComponent: scriptName)
+        if let destPath = cmdPath.destinationOfSymlink {
+            if destPath == exePath {
+                return
+            }
+        }
+        if cmdPath.isExists {
+            UI.log(verbose: "Remove `\(cmdPath)`")
             try FileManager.default.removeItem(atPath: cmdPath)
         }
-        var content = try String(contentsOfFile: shellPath)
-        content = content.replacingOccurrences(of: "export MBOX_CLI_DIR=\n", with: "export MBOX_CLI_DIR=\"\(exeDir)\"\n")
-        try content.write(toFile: cmdPath, atomically: true, encoding: .utf8)
-        try FileManager.default.setAttributes([FileAttributeKey.posixPermissions: 0o700], ofItemAtPath: cmdPath)
+        UI.log(verbose: "Link `\(cmdPath)` -> `\(exePath)`")
+        try FileManager.default.createSymbolicLink(atPath: cmdPath, withDestinationPath: exePath)
     }
 
     public static func installCommandLineAlias() throws {
-        let supportFile = MBoxCore.bundle.bundleURL.deletingLastPathComponent().appendingPathComponent("mbox.sh").path
-        let profilePath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".profile")
-        var resolved = false
+        let supportFile = MBoxCore.bundle.bundleURL.deletingLastPathComponent().appendingPathComponent("sourced.sh").path
+        let rcPath = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".mboxrc")
         let string = "[[ -s \"\(supportFile)\" ]] && source \"\(supportFile)\" # MBox"
         var content = ""
-        if profilePath.path.isFile {
-            content = try String(contentsOf: profilePath)
-            let regex = try NSRegularExpression(pattern: "^.*? source .*?/mbox\\.sh\".*$", options: .anchorsMatchLines)
-            if let index = regex.firstMatch(in: content, range: NSRange(location: 0, length: content.count)) {
-                let range = Range(index.range, in: content)
-                content.replaceSubrange(range!, with: string)
-                resolved = true
-            }
-        }
-        if !resolved {
+        if rcPath.path.isFile {
+            content = try String(contentsOf: rcPath)
             if !content.hasSuffix("\n") {
                 content.append("\n")
             }
-            if !content.hasSuffix("\n\n") {
-                content.append("\n")
-            }
-            content.append(string)
+            content = content.replacingOccurrences(of: "(?m)\n.*? # MBox\n", with: "", options: .regularExpression)
+        }
+        if !content.hasSuffix("\n\n") {
             content.append("\n")
         }
-        try content.write(to: profilePath, atomically: true, encoding: .utf8)
+        content.append(string)
+        content.append("\n")
+        UI.log(verbose: "Update `\(rcPath)`")
+        try content.write(to: rcPath, atomically: true, encoding: .utf8)
     }
 }

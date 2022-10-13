@@ -1,6 +1,4 @@
 {
   "podfile": "Native/Podfile",
-  "podlock": "Native/Podfile.lock",
-  "podspec": "Native/MBoxCore.podspec",
-  "xcodeproj": "Native/MBoxCore.xcodeproj"
+  "podspec": "Native/MBoxCore.podspec"
 }

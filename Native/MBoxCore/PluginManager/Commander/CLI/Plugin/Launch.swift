@@ -2,7 +2,7 @@
 //  Launch.swift
 //  MBoxCore
 //
-//  Created by 詹迟晶 on 2020/3/11.
+//  Created by Whirlwind on 2020/3/11.
 //  Copyright © 2020 bytedance. All rights reserved.
 //
 
@@ -26,14 +26,7 @@ extension MBCommander.Plugin {
             return options
         }
 
-        open override class var flags: [Flag] {
-            var flags = super.flags
-            flags << Flag("all", description: "All Plugins")
-            return flags
-        }
-
         open override func setup() throws {
-            self.all = self.shiftFlag("all")
             if let scriptName: String = self.shiftOption("script") {
                 guard let script = MBPluginLaunchItem.LauncherType.allCases.first(where: { $0.rawValue.lowercased() == scriptName.lowercased() }) else {
                     throw ArgumentError.invalidValue(value: scriptName, argument: "script")
@@ -42,51 +35,47 @@ extension MBCommander.Plugin {
             }
             if let roles: [String] = self.shiftOptions("role") {
                 self.roles = roles
-            } else if let roles = ProcessInfo.processInfo.environment["MBOX_ROLES"]?.split(separator: ",").map({ String($0) }) {
-                self.roles = roles
             }
             self.launcherItemNames = self.shiftArguments("name")
-            self.requireSetupLauncher = false
+            MBProcess.shared.requireSetupLauncher = false
             try super.setup()
         }
 
         open var launcherItemNames: [String] = []
         open var launcherItems: [MBPluginLaunchItem] = []
         open var script: MBPluginLaunchItem.LauncherType?
-        open var all: Bool = false
         open var roles: [String] = []
 
         open override func validate() throws {
             try super.validate()
-            self.launcherItems = try self.launcherItemNames.flatMap { name -> [MBPluginLaunchItem] in
-                let names = name.split(separator: "/")
-                let pluginName = String(names.first!)
-                guard let plugin = MBPluginManager.shared.package(for: pluginName) else {
-                    throw ArgumentError.invalidValue(value: name, argument: "name")
-                }
-                if plugin.hasLauncher != true {
-                    throw UserError("[\(plugin.name)] No launcher in the plugin.")
-                }
-                if names.count == 1 {
-                    return plugin.launcherItems
-                } else {
-                    let itemName = String(names.last!)
-                    guard let item = plugin.launcherItems.first(where: { $0.itemName.lowercased() == itemName.lowercased() }) else {
-                        throw ArgumentError.invalidValue(value: name, argument: "name")
-                    }
-                    return [item]
-                }
+            self.launcherItems = self.launcherItemNames.compactMap {
+                MBPluginManager.shared.launcherItem(for: $0)
             }
             if self.launcherItems.isEmpty {
-                let plugins = all ? Array(MBPluginManager.shared.packages) : UI.activedPlugins
-                self.launcherItems = MBPluginManager.shared.launcherItem(for: plugins, roles: self.roles)
+                self.launcherItems = MBPluginManager.shared.launcherItems(for: Array(MBPluginManager.shared.modules))
+                if !self.roles.isEmpty {
+                    let roles = self.roles.map { $0.lowercased() }
+                    self.launcherItems = self.launcherItems.filter { item in
+                        if item.roles.isEmpty { return true }
+                        return !Set(item.roles.map { $0.lowercased() }).intersection(roles).isEmpty
+                    }
+                }
+                for name in MBPluginLaunchItem.History.shared.dictionary.keys {
+                    guard let item = MBPluginManager.shared.launcherItem(for: name) else {
+                        MBPluginLaunchItem.History.shared.remove(name: name)
+                        continue
+                    }
+                    if !self.launcherItems.contains(item) {
+                        self.launcherItems.append(item)
+                    }
+                }
             }
         }
 
         open override func run() throws {
             try super.run()
             let result = MBPluginManager.shared.installLauncherItems(self.launcherItems, type: self.script)
-            if UI.apiFormatter != .none {
+            if MBProcess.shared.apiFormatter != .none {
                 UI.log(api: ["success": result.success, "failed": result.failed])
             }
             UI.statusCode = result.failed.isEmpty ? 0 : 1

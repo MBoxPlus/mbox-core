@@ -2,7 +2,7 @@
 //  MBCodableArray.swift
 //  MBoxCore
 //
-//  Created by 詹迟晶 on 2020/1/13.
+//  Created by Whirlwind on 2020/1/13.
 //  Copyright © 2020 bytedance. All rights reserved.
 //
 
@@ -21,7 +21,7 @@ open class MBCodableArray<T: MBCodable>: NSObject, MBCodable {
 
     public static func load(fromObject object: Any) throws -> Self {
         guard let array = object as? [Any] else {
-            throw NSError(domain: "Convert Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "类型不匹配 \(self): \(object)"])
+            throw NSError(domain: "Convert Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "Type mismatch \(self): \(object)"])
         }
         let item = try self.init(array: array.map { try T.load(fromObject: $0) })
         return item

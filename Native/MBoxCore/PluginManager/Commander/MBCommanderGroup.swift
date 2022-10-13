@@ -36,8 +36,8 @@ public class MBCommanderGroup: NSObject {
     }
 
     public func command(for parser: ArgumentParser) -> MBCommanderGroup? {
-        guard let cmd = parser.argument() else { return self }
         let alias: String? = try! parser.option(for: "expand-alias")
+        guard let cmd = parser.argument() else { return self }
         var current: MBCommanderGroup? = self.subgroup(for: cmd)
         if current == nil {
             if let alias = alias, !alias.isEmpty {
@@ -48,13 +48,13 @@ public class MBCommanderGroup: NSObject {
                 current = self
             }
         }
-        while current != nil, let cmd = parser.argument() {
-            let next = current?.subgroup(for: cmd)
-            if next == nil {
-                parser.unshift(argument: cmd)
-                break
+        parser.eachArgument { (arg: String, shift: inout Bool) in
+            guard let next = current?.subgroup(for: arg) else {
+                return true
             }
+            shift = true
             current = next
+            return false
         }
         return current
     }

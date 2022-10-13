@@ -32,6 +32,9 @@ extension NSWorkspace {
     }
 
     static func bundleIdentifier(forApplication name: String) -> String? {
+        if NSWorkspace.shared.absolutePathForApplication(withBundleIdentifier: name) != nil {
+            return name
+        }
         if let path = NSWorkspace.shared.fullPath(forApplication: name),
             let bundle = Bundle(path: path) {
             return bundle.bundleIdentifier
